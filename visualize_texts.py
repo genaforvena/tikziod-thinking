@@ -7,7 +7,6 @@ import math
 import html
 import json
 import asyncio
-import aiohttp
 from ollama import AsyncClient
 
 class CustomEncoder(json.JSONEncoder):
@@ -63,6 +62,7 @@ def generate_html(texts, word_counts, word_positions):
     max_count = max(word_counts.values())
     
     word_positions_json = json.dumps(word_positions, cls=CustomEncoder)
+    word_counts_json = json.dumps(word_counts)
     
     html_output = f"""
     <!DOCTYPE html>
@@ -151,11 +151,25 @@ def generate_html(texts, word_counts, word_positions):
                 max-height: 200px;
                 overflow-y: auto;
             }}
+            #frequency-slider-container {{
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background-color: white;
+                border: 1px solid #ddd;
+                padding: 10px;
+                z-index: 1002;
+            }}
+            #frequency-slider {{
+                width: 200px;
+            }}
         </style>
         <script>
         const wordPositions = {word_positions_json};
+        const wordCounts = {word_counts_json};
         let currentWord = null;
         let currentContext = null;
+        let sortedWords = [];
 
         function supportsNativeSmoothScroll() {{
             return 'scrollBehavior' in document.documentElement.style;
@@ -196,6 +210,13 @@ def generate_html(texts, word_counts, word_positions):
             elements.forEach(el => {{
                 el.classList.add('hidden');
                 hideCounter(el.parentNode);
+            }});
+        }}
+
+        function showWord(word) {{
+            const elements = document.querySelectorAll(`[data-word="${{word}}"]`);
+            elements.forEach(el => {{
+                el.classList.remove('hidden');
             }});
         }}
 
@@ -256,6 +277,14 @@ def generate_html(texts, word_counts, word_positions):
             resultDiv.style.display = 'block';
         }}
 
+        function updateWordVisibility(threshold) {{
+            const visibleWords = sortedWords.slice(0, threshold);
+            const hiddenWords = sortedWords.slice(threshold);
+            
+            visibleWords.forEach(word => showWord(word));
+            hiddenWords.forEach(word => hideWord(word));
+        }}
+
         document.addEventListener('DOMContentLoaded', function() {{
             const wordActions = document.createElement('div');
             wordActions.id = 'word-actions';
@@ -276,6 +305,23 @@ def generate_html(texts, word_counts, word_positions):
             const continuationResult = document.createElement('div');
             continuationResult.id = 'continuation-result';
             document.body.appendChild(continuationResult);
+
+            const sliderContainer = document.createElement('div');
+            sliderContainer.id = 'frequency-slider-container';
+            const slider = document.createElement('input');
+            slider.type = 'range';
+            slider.id = 'frequency-slider';
+            slider.min = '0';
+            slider.max = Object.keys(wordCounts).length;
+            slider.value = Object.keys(wordCounts).length;
+            sliderContainer.appendChild(slider);
+            document.body.appendChild(sliderContainer);
+
+            sortedWords = Object.keys(wordCounts).sort((a, b) => wordCounts[b] - wordCounts[a]);
+
+            slider.addEventListener('input', function() {{
+                updateWordVisibility(parseInt(this.value));
+            }});
 
             const commonWords = document.querySelectorAll('.common-word');
             commonWords.forEach(word => {{
@@ -331,7 +377,8 @@ def generate_html(texts, word_counts, word_positions):
     </head>
     <body>
         <h1>Interactive Intersecting Texts Visualization</h1>
-    """  
+    """
+
     for i, text in enumerate(texts):
         html_output += f'<div class="text"><h2>Text {i+1}:</h2><p>'
         tokens = re.findall(r'\b\w+\b|[^\w\s]', text)
