@@ -153,16 +153,17 @@ def generate_html(texts, word_counts, word_positions):
             }}
             #frequency-slider-container {{
                 position: fixed;
-                top: 20px;
+                bottom: 20px;
+                left: 20px;
                 right: 20px;
                 background-color: white;
-                border: 1px solid #ddd;
                 padding: 10px;
-                z-index: 1002;
+                border: 1px solid #ddd;
+                z-index: 1000;
             }}
             #frequency-slider {{
-                width: 200px;
-            }}
+                width: 100%;
+           }}
         </style>
         <script>
         const wordPositions = {word_positions_json};
@@ -278,11 +279,19 @@ def generate_html(texts, word_counts, word_positions):
         }}
 
         function updateWordVisibility(threshold) {{
-            const visibleWords = sortedWords.slice(0, threshold);
-            const hiddenWords = sortedWords.slice(threshold);
+            const sortedWords = Object.entries(wordCounts).sort((a, b) => b[1] - a[1]);
+            const totalWords = sortedWords.length;
+            const visibleCount = Math.floor(totalWords * (1 - threshold));
             
-            visibleWords.forEach(word => showWord(word));
-            hiddenWords.forEach(word => hideWord(word));
+            sortedWords.forEach((entry, index) => {{
+                const [word, count] = entry;
+                const elements = document.querySelectorAll(`[data-word="${{word}}"]`);
+                if (index < visibleCount) {{
+                    elements.forEach(el => el.classList.remove('hidden'));
+                }} else {{
+                    elements.forEach(el => el.classList.add('hidden'));
+                }}
+            }});
         }}
 
         document.addEventListener('DOMContentLoaded', function() {{
@@ -320,9 +329,9 @@ def generate_html(texts, word_counts, word_positions):
             sortedWords = Object.keys(wordCounts).sort((a, b) => wordCounts[b] - wordCounts[a]);
 
             slider.addEventListener('input', function() {{
-                updateWordVisibility(parseInt(this.value));
+                const threshold = this.value / 100;
+                updateWordVisibility(threshold);
             }});
-
             const commonWords = document.querySelectorAll('.common-word');
             commonWords.forEach(word => {{
                 word.addEventListener('mouseover', function(e) {{
