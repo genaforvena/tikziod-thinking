@@ -2,6 +2,7 @@ import re
 from collections import defaultdict
 import argparse
 import random
+import math
 
 def read_file(file_path):
     with open(file_path, 'r') as file:
@@ -13,11 +14,24 @@ def process_texts(texts):
     word_counts = defaultdict(int)
     word_positions = defaultdict(list)
     for word in all_words:
-        word_counts[word] = sum(word in s for s in word_sets)
+        word_counts[word] = sum(text.lower().count(word) for text in texts)
         for i, text in enumerate(texts):
             for match in re.finditer(r'\b' + re.escape(word) + r'\b', text, re.IGNORECASE):
                 word_positions[word].append((i, match.start()))
     return word_sets, word_counts, word_positions
+
+def calculate_font_size(count, min_count, max_count):
+    if min_count == max_count:
+        return 100
+    if max_count - min_count <= 10:
+        # Linear scaling for small ranges
+        return 80 + (count - min_count) * 4
+    else:
+        # Logarithmic scaling for larger ranges
+        log_min = math.log(min_count)
+        log_max = math.log(max_count)
+        log_count = math.log(count)
+        return 80 + (log_count - log_min) / (log_max - log_min) * 60
 
 def generate_html(texts, word_counts, word_positions):
     fonts = [
@@ -25,7 +39,10 @@ def generate_html(texts, word_counts, word_positions):
         'Merriweather', 'Playfair Display', 'Nunito', 'Quicksand', 'Poppins', 
         'Archivo', 'Fira Sans', 'Josefin Sans', 'Comfortaa', 'Caveat', 'Pacifico'
     ]
-    word_fonts = {word: random.choice(fonts) for word, count in word_counts.items() if count > 1}
+    word_fonts = {word: random.choice(fonts) for word in word_counts.keys()}
+    
+    min_count = min(word_counts.values())
+    max_count = max(word_counts.values())
     
     html_output = """
     <!DOCTYPE html>
@@ -39,6 +56,7 @@ def generate_html(texts, word_counts, word_positions):
             body { font-family: Arial, sans-serif; line-height: 1.6; padding: 20px; }
             h1 { color: #333; }
             .text { margin-bottom: 20px; }
+            .word { display: inline-block; vertical-align: middle; }
             .common-word { font-weight: bold; cursor: pointer; }
             .common-word:hover { text-decoration: underline; }
         </style>
@@ -62,15 +80,17 @@ def generate_html(texts, word_counts, word_positions):
         words = re.finditer(r'\b\w+\b', text)
         for match in words:
             word = match.group().lower()
-            if word in word_fonts:
-                font = word_fonts[word]
+            count = word_counts[word]
+            font_size = calculate_font_size(count, min_count, max_count)
+            font = word_fonts[word]
+            if count > 1:
                 positions = word_positions[word]
                 current_index = positions.index((i, match.start()))
                 next_index = (current_index + 1) % len(positions)
                 next_text_index, next_position = positions[next_index]
-                html_output += f'<span id="word-{word}-{i}-{match.start()}" class="common-word" style="font-family: \'{font}\', sans-serif;" onclick="jumpToWord(\'{word}\', {next_text_index}, {next_position})">{match.group()}</span> '
+                html_output += f'<span id="word-{word}-{i}-{match.start()}" class="word common-word" style="font-family: \'{font}\', sans-serif; font-size: {font_size}%;" onclick="jumpToWord(\'{word}\', {next_text_index}, {next_position})">{match.group()}</span> '
             else:
-                html_output += f'{match.group()} '
+                html_output += f'<span class="word" style="font-size: {font_size}%;">{match.group()}</span> '
         html_output += '</p></div>'
     
     html_output += """
@@ -80,7 +100,7 @@ def generate_html(texts, word_counts, word_positions):
     return html_output
 
 def main():
-    parser = argparse.ArgumentParser(description="Generate interactive intersecting texts visualization with HTML output, unique fonts, and clickable links.")
+    parser = argparse.ArgumentParser(description="Generate interactive intersecting texts visualization with HTML output, unique fonts, clickable links, and variable word sizes.")
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('-f', '--file', type=str, help="Path to file containing texts (one per line)")
     group.add_argument('-t', '--texts', nargs='+', help="List of texts to visualize")

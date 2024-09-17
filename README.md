@@ -1,4 +1,4 @@
-## How to Use the HTML Intersecting Texts Visualizer with Unique Fonts
+## How to Use the Interactive HTML Intersecting Texts Visualizer with Variable Word Sizes
 
 ### Basic Usage
 
@@ -32,7 +32,7 @@ python visualize_texts.py -t "First text here" "Second text here" "Third text he
 
 After running the script:
 
-1. An HTML file named `intersecting_texts.html` will be generated in the same directory.
+1. An interactive HTML file named `intersecting_texts.html` will be generated in the same directory.
 
 2. Open this file in any modern web browser to view the visualization.
 
@@ -42,7 +42,15 @@ After running the script:
 
 - Each input text is displayed as a separate paragraph, prefixed with "Text 1:", "Text 2:", etc.
 - Words that appear in more than one text are highlighted in bold and assigned a unique typeface.
-- The varying typefaces make it easy to spot the same word across different texts.
+- The font size of each word is proportional to its frequency across all texts.
+- More frequent words appear larger, while less frequent words appear smaller.
+- The sizing uses a combination of linear and logarithmic scaling to ensure readability while still representing frequency differences.
+
+### Interactive Features
+
+- Common words (those appearing in multiple texts) are clickable. When you click on a common word, the page will smoothly scroll to the next occurrence of that word in another text.
+- The target word is briefly highlighted in yellow when scrolled to, making it easy to locate.
+- You can continue clicking to cycle through all occurrences of the word across different texts.
 
 ### Tips for Optimal Results
 
@@ -50,11 +58,12 @@ After running the script:
 
 2. **Number of Texts**: The script can handle multiple texts, but for clarity, it's best to use 2-5 texts at a time.
 
-3. **Common Words**: The visualization is most effective when there are some common words between the texts, but not too many. This creates interesting connections without overwhelming the reader with too many font changes.
+3. **Word Frequency**: The visualization is most effective when there's a good mix of common and unique words. This creates an interesting visual hierarchy while maintaining readability.
 
 ### Customization
 
 - If you want to use different fonts, you can modify the `fonts` list in the script. Make sure to also update the Google Fonts link in the HTML template if you add new fonts.
+- You can adjust the `calculate_font_size` function in the script to change how word frequency affects font size.
 
 ### Troubleshooting
 
@@ -63,6 +72,6 @@ If you encounter any issues:
 1. Ensure you're using the latest version of the script.
 2. Check that you have a modern web browser to view the HTML file.
 3. Make sure you have an active internet connection to load the Google Fonts.
-4. If some fonts are not displaying correctly, try clearing your browser cache or using a different browser.
+4. If the interactive features are not working, check your browser's JavaScript settings.
 
-If you need to convert the HTML to PDF, you can use various online tools or browser extensions that allow you to save web pages as PDFs. Note that some fonts might not render correctly in PDFs, depending on the conversion method used.
+Note: If you need to convert the HTML to PDF, the interactive features and custom fonts may not be preserved in the PDF version.
