@@ -33,6 +33,7 @@ def calculate_font_size(count, min_count, max_count):
         log_count = math.log(count)
         return 80 + (log_count - log_min) / (log_max - log_min) * 60
 
+
 def generate_html(texts, word_counts, word_positions):
     fonts = [
         'Roboto', 'Open Sans', 'Lato', 'Montserrat', 'Raleway', 'Oswald', 
@@ -63,6 +64,7 @@ def generate_html(texts, word_counts, word_positions):
             .counter { font-size: 10px; color: #666; margin-bottom: -5px; }
             .current { margin-right: 2px; }
             .total { margin-left: 2px; }
+            .punctuation { display: inline-block; vertical-align: bottom; margin-right: 5px; }
         </style>
         <script>
             function jumpToWord(word, textIndex, position) {
@@ -81,21 +83,29 @@ def generate_html(texts, word_counts, word_positions):
     
     for i, text in enumerate(texts):
         html_output += f'<div class="text"><h2>Text {i+1}:</h2><p>'
-        words = re.finditer(r'\b\w+\b', text)
-        for match in words:
-            word = match.group().lower()
-            count = word_counts[word]
-            font_size = calculate_font_size(count, min_count, max_count)
-            font = word_fonts[word]
-            positions = word_positions[word]
-            current_index = positions.index((i, match.start())) + 1
-            html_output += f'<span class="word-container"><span class="counter"><span class="current">{current_index}</span>/<span class="total">{count}</span></span><br>'
-            if count > 1:
-                next_index = (positions.index((i, match.start())) + 1) % len(positions)
-                next_text_index, next_position = positions[next_index]
-                html_output += f'<span id="word-{word}-{i}-{match.start()}" class="word common-word" style="font-family: \'{font}\', sans-serif; font-size: {font_size}%;" onclick="jumpToWord(\'{word}\', {next_text_index}, {next_position})">{match.group()}</span></span> '
+        tokens = re.findall(r'\b\w+\b|[^\w\s]', text)
+        current_position = 0
+        for token in tokens:
+            if re.match(r'\w+', token):
+                word = token.lower()
+                count = word_counts[word]
+                font_size = calculate_font_size(count, min_count, max_count)
+                font = word_fonts[word]
+                positions = word_positions[word]
+                current_index = sum(1 for pos in positions if pos[0] < i) + sum(1 for pos in positions if pos[0] == i and pos[1] <= current_position) + 1
+                html_output += f'<span class="word-container"><span class="counter"><span class="current">{current_index}</span>/<span class="total">{count}</span></span><br>'
+                if count > 1:
+                    next_positions = [pos for pos in positions if pos > (i, current_position)]
+                    if next_positions:
+                        next_text_index, next_position = next_positions[0]
+                    else:
+                        next_text_index, next_position = positions[0]
+                    html_output += f'<span id="word-{word}-{i}-{current_position}" class="word common-word" style="font-family: \'{font}\', sans-serif; font-size: {font_size}%;" onclick="jumpToWord(\'{word}\', {next_text_index}, {next_position})">{token}</span></span> '
+                else:
+                    html_output += f'<span class="word" style="font-size: {font_size}%;">{token}</span></span> '
             else:
-                html_output += f'<span class="word" style="font-size: {font_size}%;">{match.group()}</span></span> '
+                html_output += f'<span class="punctuation">{token}</span>'
+            current_position += len(token) + 1
         html_output += '</p></div>'
     
     html_output += """
@@ -105,7 +115,7 @@ def generate_html(texts, word_counts, word_positions):
     return html_output
 
 def main():
-    parser = argparse.ArgumentParser(description="Generate interactive intersecting texts visualization with HTML output, unique fonts, clickable links, variable word sizes, and occurrence counters.")
+    parser = argparse.ArgumentParser(description="Generate interactive intersecting texts visualization with HTML output, unique fonts, clickable links, variable word sizes, occurrence counters, and preserved punctuation.")
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('-f', '--file', type=str, help="Path to file containing texts (one per line)")
     group.add_argument('-t', '--texts', nargs='+', help="List of texts to visualize")
