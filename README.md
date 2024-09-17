@@ -1,4 +1,6 @@
-## How to Use the Interactive HTML Intersecting Texts Visualizer with Word Counters
+## Interactive HTML Intersecting Texts Visualizer with Word Counters and Hover Effects
+
+This script generates an interactive HTML visualization of intersecting texts, featuring word counters, hover effects, and dynamic highlighting.
 
 ### Basic Usage
 
@@ -43,18 +45,16 @@ After running the script:
 - Each input text is displayed as a separate paragraph, prefixed with "Text 1:", "Text 2:", etc.
 - Words that appear in more than one text are highlighted in bold and assigned a unique typeface.
 - The font size of each word is proportional to its frequency across all texts.
-- Above each word, there's a small counter showing two numbers:
-  - The left number indicates the current occurrence of the word within all texts.
-  - The right number shows the total occurrences of the word across all texts.
-- More frequent words appear larger, while less frequent words appear smaller.
-- The sizing uses a combination of linear and logarithmic scaling to ensure readability while still representing frequency differences.
+- Common words (those appearing in multiple texts) are clickable and have hover effects.
 
 ### Interactive Features
 
-- Common words (those appearing in multiple texts) are clickable. When you click on a common word, the page will smoothly scroll to the next occurrence of that word in another text.
-- The target word is briefly highlighted in yellow when scrolled to, making it easy to locate.
+- When you hover over a common word:
+  - A counter appears above the word, showing its current occurrence and total occurrences.
+  - All instances of that word across all texts are highlighted.
+- Common words are clickable. When you click on a common word, the page will smoothly scroll to the next occurrence of that word in another text.
+- The target word is briefly highlighted when scrolled to, making it easy to locate.
 - You can continue clicking to cycle through all occurrences of the word across different texts.
-- As you click through occurrences, you'll see the left number in the counter change, helping you keep track of which occurrence you're viewing.
 
 ### Tips for Optimal Results
 
@@ -68,7 +68,7 @@ After running the script:
 
 - If you want to use different fonts, you can modify the `fonts` list in the script. Make sure to also update the Google Fonts link in the HTML template if you add new fonts.
 - You can adjust the `calculate_font_size` function in the script to change how word frequency affects font size.
-- The appearance of the counters can be modified by adjusting the CSS in the HTML template.
+- The appearance of the counters and highlighting can be modified by adjusting the CSS in the HTML template.
 
 ### Troubleshooting
 
@@ -80,3 +80,12 @@ If you encounter any issues:
 4. If the interactive features are not working, check your browser's JavaScript settings.
 
 Note: If you need to convert the HTML to PDF, the interactive features and custom fonts may not be preserved in the PDF version.
+
+### Recent Updates
+
+- Added hover effects to show word counters only when hovering over words.
+- Implemented dynamic highlighting of all instances of a word when hovering.
+- Fixed JSON serialization issues for improved compatibility with various input texts.
+- Improved smooth scrolling behavior with fallback for older browsers.
+
+For any further questions or issues, please refer to the script comments or reach out to the project maintainers.
