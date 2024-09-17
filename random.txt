@@ -1,0 +1,5 @@
+It appears that the script interpreted each word as a separate text, 
+rather than treating each quoted phrase as a single text. 
+This could happen if the quotes were not properly handled by the command line or the script.
+
+Let's modify the script to handle this issue 

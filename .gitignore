@@ -1,2 +1,8 @@
 venv/
+*.tex
+*.aux
+*.log
+*.out
+*.pdf
+
 

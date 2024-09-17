@@ -2,6 +2,7 @@ import re
 from collections import defaultdict
 import random
 import argparse
+import shlex
 
 def read_file(file_path):
     with open(file_path, 'r') as file:
@@ -59,13 +60,14 @@ def main():
     parser = argparse.ArgumentParser(description="Generate intersecting texts visualization.")
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('-f', '--file', type=str, help="Path to file containing texts (one per line)")
-    group.add_argument('-t', '--texts', nargs='+', help="List of texts to visualize")
+    group.add_argument('-t', '--texts', type=str, help="Quoted texts to visualize, separated by spaces")
     args = parser.parse_args()
 
     if args.file:
         texts = read_file(args.file)
     else:
-        texts = args.texts
+        # Use shlex.split to properly handle quoted arguments
+        texts = shlex.split(args.texts)
 
     word_sets, word_counts, positions = process_texts(texts)
     latex_code = generate_latex(texts, word_sets, word_counts, positions)
