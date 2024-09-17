@@ -1,6 +1,11 @@
 import re
 from collections import defaultdict
 import random
+import argparse
+
+def read_file(file_path):
+    with open(file_path, 'r') as file:
+        return [line.strip() for line in file if line.strip()]
 
 def process_texts(texts):
     # Normalize and tokenize texts
@@ -50,18 +55,26 @@ def generate_latex(texts, word_sets, word_counts, positions):
 """
     return latex_output
 
-# Example usage
-texts = [
-    "The quick brown fox jumps over the lazy dog",
-    "A quick brown dog jumps over the lazy cat",
-    "The lazy fox and the quick cat are friends"
-]
+def main():
+    parser = argparse.ArgumentParser(description="Generate intersecting texts visualization.")
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument('-f', '--file', type=str, help="Path to file containing texts (one per line)")
+    group.add_argument('-t', '--texts', nargs='+', help="List of texts to visualize")
+    args = parser.parse_args()
 
-word_sets, word_counts, positions = process_texts(texts)
-latex_code = generate_latex(texts, word_sets, word_counts, positions)
+    if args.file:
+        texts = read_file(args.file)
+    else:
+        texts = args.texts
 
-print(latex_code)
+    word_sets, word_counts, positions = process_texts(texts)
+    latex_code = generate_latex(texts, word_sets, word_counts, positions)
 
-# Save to file
-with open('intersecting_texts.tex', 'w') as f:
-    f.write(latex_code)
+    with open('intersecting_texts.tex', 'w') as f:
+        f.write(latex_code)
+    
+    print("LaTeX file 'intersecting_texts.tex' has been generated.")
+    print("Compile it using 'pdflatex intersecting_texts.tex' to create the PDF visualization.")
+
+if __name__ == "__main__":
+    main()
