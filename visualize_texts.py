@@ -67,13 +67,65 @@ def generate_html(texts, word_counts, word_positions):
             body {{ font-family: Arial, sans-serif; line-height: 1.6; padding: 20px; }}
             h1 {{ color: #333; }}
             .text {{ margin-bottom: 20px; }}
-            .word-container {{ display: inline-block; vertical-align: bottom; margin-right: 5px; text-align: center; position: relative; }}
+            .word-container {{ 
+                display: inline-block; 
+                vertical-align: bottom; 
+                margin-right: 5px; 
+                text-align: center; 
+                position: relative;
+                padding-top: 20px; /* Space for the counter and button */
+            }}
             .word {{ display: inline-block; }}
             .common-word {{ font-weight: bold; text-decoration: none; color: inherit; }}
             .common-word:hover {{ text-decoration: underline; }}
-            .counter {{ display: none; font-size: 10px; color: #666; position: absolute; top: -15px; left: 50%; transform: translateX(-50%); white-space: nowrap; }}
+            .counter {{ 
+                display: none; 
+                font-size: 10px; 
+                color: #666; 
+                position: absolute; 
+                top: 0; 
+                left: 50%; 
+                transform: translateX(-50%); 
+                white-space: nowrap;
+                background-color: white;
+                padding: 2px;
+                border: 1px solid #ddd;
+                border-radius: 3px;
+            }}
+            .hide-button {{ 
+                display: none; 
+                font-size: 10px; 
+                background-color: #f44336; 
+                color: white; 
+                border: none; 
+                cursor: pointer; 
+                padding: 2px 5px; 
+                position: absolute;
+                top: 0;
+                right: 0;
+                z-index: 10;
+            }}
             .punctuation {{ display: inline-block; vertical-align: bottom; margin-right: 5px; }}
-            .highlight {{ background-color: yellow; }}
+            .highlight {{ 
+                background-color: #FFFF00; 
+                box-shadow: 0 0 5px #FFFF00;
+            }}
+            .hidden {{ display: none; }}
+            .next-occurrences {{ 
+                display: none; 
+                position: absolute; 
+                bottom: -50px; 
+                left: 50%; 
+                transform: translateX(-50%); 
+                background-color: white; 
+                border: 1px solid #ddd; 
+                padding: 5px; 
+                max-height: 100px; 
+                overflow-y: auto; 
+                z-index: 1000;
+            }}
+            .next-occurrence {{ cursor: pointer; padding: 2px 5px; }}
+            .next-occurrence:hover {{ background-color: #f0f0f0; }}
         </style>
         <script>
         const wordPositions = {word_positions_json};
@@ -94,16 +146,14 @@ def generate_html(texts, word_counts, word_positions):
 
         function showCounter(element) {{
             const counter = element.querySelector('.counter');
-            if (counter) {{
-                counter.style.display = 'block';
-            }}
+            const hideButton = element.querySelector('.hide-button');
+            if (counter) counter.style.display = 'block';
+            if (hideButton) hideButton.style.display = 'block';
         }}
 
         function hideCounter(element) {{
             const counter = element.querySelector('.counter');
-            if (counter) {{
-                counter.style.display = 'none';
-            }}
+            if (counter) counter.style.display = 'none';
         }}
 
         function highlightWords(word) {{
@@ -116,21 +166,82 @@ def generate_html(texts, word_counts, word_positions):
             elements.forEach(el => el.classList.remove('highlight'));
         }}
 
+        function hideWord(word) {{
+            const elements = document.querySelectorAll(`[data-word="${{word}}"]`);
+            elements.forEach(el => {{
+                el.classList.add('hidden');
+                hideCounter(el.parentNode);
+            }});
+        }}
+
+        function showNextOccurrences(element, word) {{
+            const positions = wordPositions[word];
+            const currentTextIndex = parseInt(element.id.split('-')[2]);
+            const currentPosition = parseInt(element.id.split('-')[3]);
+            
+            let nextOccurrences = positions.filter(pos => 
+                pos[0] > currentTextIndex || (pos[0] === currentTextIndex && pos[1] > currentPosition)
+            );
+            if (nextOccurrences.length === 0) {{
+                nextOccurrences = positions.slice(0, 5);
+            }} else if (nextOccurrences.length > 5) {{
+                nextOccurrences = nextOccurrences.slice(0, 5);
+            }}
+            
+            let occurrencesHtml = '<div class="next-occurrences">';
+            nextOccurrences.forEach(pos => {{
+                occurrencesHtml += `<div class="next-occurrence" onclick="smoothScroll('#word-${{word}}-${{pos[0]}}-${{pos[1]}}')">Text ${{pos[0] + 1}}</div>`;
+            }});
+            occurrencesHtml += '</div>';
+            
+            element.parentNode.insertAdjacentHTML('beforeend', occurrencesHtml);
+        }}
+
+        function hideNextOccurrences(element) {{
+            const nextOccurrences = element.parentNode.querySelector('.next-occurrences');
+            if (nextOccurrences) {{
+                nextOccurrences.remove();
+            }}
+        }}
+
         document.addEventListener('DOMContentLoaded', function() {{
             const commonWords = document.querySelectorAll('.common-word');
             commonWords.forEach(word => {{
                 word.addEventListener('mouseover', function() {{
                     showCounter(this.parentNode);
                     highlightWords(this.dataset.word);
+                    showNextOccurrences(this, this.dataset.word);
                 }});
                 word.addEventListener('mouseout', function() {{
-                    hideCounter(this.parentNode);
                     unhighlightWords(this.dataset.word);
+                    hideNextOccurrences(this);
                 }});
                 word.addEventListener('click', function(e) {{
                     if (!supportsNativeSmoothScroll()) {{
                         e.preventDefault();
                         smoothScroll(this.getAttribute('href'));
+                    }}
+                }});
+            }});
+
+            const hideButtons = document.querySelectorAll('.hide-button');
+            hideButtons.forEach(button => {{
+                button.addEventListener('click', function(e) {{
+                    e.stopPropagation();
+                    hideWord(this.dataset.word);
+                }});
+            }});
+
+            // Keep counters and buttons visible when hovering over them
+            const wordContainers = document.querySelectorAll('.word-container');
+            wordContainers.forEach(container => {{
+                container.addEventListener('mouseover', function() {{
+                    showCounter(this);
+                }});
+                container.addEventListener('mouseout', function(e) {{
+                    // Check if the mouse is still over the counter or button
+                    if (!e.relatedTarget || !this.contains(e.relatedTarget)) {{
+                        hideCounter(this);
                     }}
                 }});
             }});
@@ -155,6 +266,7 @@ def generate_html(texts, word_counts, word_positions):
                 current_index = sum(1 for pos in positions if pos <= (i, current_position)) + 1
                 html_output += f'<span class="word-container">'
                 html_output += f'<span class="counter"><span class="current">{current_index}</span>/<span class="total">{count}</span></span>'
+                html_output += f'<button class="hide-button" data-word="{html.escape(word)}">Hide</button>'
                 if count > 1:
                     next_positions = [pos for pos in positions if pos > (i, current_position)]
                     if next_positions:
