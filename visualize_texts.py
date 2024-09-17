@@ -279,7 +279,7 @@ def generate_html(texts, word_counts, word_positions):
         }}
 
         function updateWordVisibility(threshold) {{
-            const sortedWords = Object.entries(wordCounts).sort((a, b) => b[1] - a[1]);
+            const sortedWords = Object.entries(wordCounts).sort((a, b) => a[1] - b[1]);
             const totalWords = sortedWords.length;
             const visibleCount = Math.floor(totalWords * (1 - threshold));
             
@@ -321,8 +321,8 @@ def generate_html(texts, word_counts, word_positions):
             slider.type = 'range';
             slider.id = 'frequency-slider';
             slider.min = '0';
-            slider.max = Object.keys(wordCounts).length;
-            slider.value = Object.keys(wordCounts).length;
+            slider.max = Object.keys(wordCounts);
+            slider.value = 0;
             sliderContainer.appendChild(slider);
             document.body.appendChild(sliderContainer);
 
