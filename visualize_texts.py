@@ -1,10 +1,14 @@
 import re
+from aiohttp import web
 from collections import defaultdict
 import argparse
 import random
 import math
 import html
 import json
+import asyncio
+import aiohttp
+from ollama import AsyncClient
 
 class CustomEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -38,6 +42,13 @@ def calculate_font_size(count, min_count, max_count):
         log_max = math.log(max_count)
         log_count = math.log(count)
         return 80 + (log_count - log_min) / (log_max - log_min) * 60
+
+
+async def get_ollama_continuation(word, context):
+    client = AsyncClient()
+    prompt = f"Continue the following sentence that contains the word '{word}': {context}"
+    response = await client.chat(model='llama2', messages=[{'role': 'user', 'content': prompt}])
+    return response['message']['content']
 
 
 def generate_html(texts, word_counts, word_positions):
@@ -107,6 +118,7 @@ def generate_html(texts, word_counts, word_positions):
             }}
             #hide-button {{ background-color: #f44336; }}
             #strikeout-button {{ background-color: #4CAF50; }}
+            #continue-button {{ background-color: #2196F3; }}
             .punctuation {{ display: inline-block; vertical-align: bottom; margin-right: 5px; }}
             .highlight {{ 
                 background-color: #FFFF00; 
@@ -126,10 +138,24 @@ def generate_html(texts, word_counts, word_positions):
                 z-index: 1000;
                 white-space: nowrap;
             }}
+            #continuation-result {{
+                display: none;
+                position: fixed;
+                bottom: 20px;
+                left: 20px;
+                right: 20px;
+                background-color: white;
+                border: 1px solid #ddd;
+                padding: 10px;
+                z-index: 1001;
+                max-height: 200px;
+                overflow-y: auto;
+            }}
         </style>
         <script>
         const wordPositions = {word_positions_json};
         let currentWord = null;
+        let currentContext = null;
 
         function supportsNativeSmoothScroll() {{
             return 'scrollBehavior' in document.documentElement.style;
@@ -203,12 +229,31 @@ def generate_html(texts, word_counts, word_positions):
             }}
         }}
 
-        function showWordActions(word, x, y) {{
+        function showWordActions(word, context, x, y) {{
             const wordActions = document.getElementById('word-actions');
             wordActions.style.display = 'block';
             wordActions.style.left = `${{x}}px`;
             wordActions.style.top = `${{y + 20}}px`;  // 20px below the word
             currentWord = word;
+            currentContext = context;
+        }}
+
+        async function getContinuation(word, context) {{
+            const response = await fetch('/get_continuation', {{
+                method: 'POST',
+                headers: {{
+                    'Content-Type': 'application/json',
+                }},
+                body: JSON.stringify({{ word, context }}),
+            }});
+            const data = await response.json();
+            return data.continuation;
+        }}
+
+        function showContinuationResult(continuation) {{
+            const resultDiv = document.getElementById('continuation-result');
+            resultDiv.textContent = continuation;
+            resultDiv.style.display = 'block';
         }}
 
         document.addEventListener('DOMContentLoaded', function() {{
@@ -220,9 +265,17 @@ def generate_html(texts, word_counts, word_positions):
             const strikeoutButton = document.createElement('button');
             strikeoutButton.id = 'strikeout-button';
             strikeoutButton.textContent = 'Strike-out';
+            const continueButton = document.createElement('button');
+            continueButton.id = 'continue-button';
+            continueButton.textContent = 'Continue';
             wordActions.appendChild(hideButton);
             wordActions.appendChild(strikeoutButton);
+            wordActions.appendChild(continueButton);
             document.body.appendChild(wordActions);
+
+            const continuationResult = document.createElement('div');
+            continuationResult.id = 'continuation-result';
+            document.body.appendChild(continuationResult);
 
             const commonWords = document.querySelectorAll('.common-word');
             commonWords.forEach(word => {{
@@ -230,7 +283,8 @@ def generate_html(texts, word_counts, word_positions):
                     showCounter(this.parentNode);
                     highlightWords(this.dataset.word);
                     showNextEntry(this, this.dataset.word);
-                    showWordActions(this.dataset.word, e.pageX, e.pageY);
+                    const context = this.closest('p').textContent;
+                    showWordActions(this.dataset.word, context, e.pageX, e.pageY);
                 }});
                 word.addEventListener('mouseout', function() {{
                     hideCounter(this.parentNode);
@@ -259,6 +313,14 @@ def generate_html(texts, word_counts, word_positions):
                 }}
             }});
 
+            continueButton.addEventListener('click', async function() {{
+                if (currentWord && currentContext) {{
+                    const continuation = await getContinuation(currentWord, currentContext);
+                    showContinuationResult(continuation);
+                    wordActions.style.display = 'none';
+                }}
+            }});
+
             document.addEventListener('click', function(e) {{
                 if (!e.target.closest('.common-word') && !e.target.closest('#word-actions')) {{
                     wordActions.style.display = 'none';
@@ -269,8 +331,7 @@ def generate_html(texts, word_counts, word_positions):
     </head>
     <body>
         <h1>Interactive Intersecting Texts Visualization</h1>
-    """
-    
+    """  
     for i, text in enumerate(texts):
         html_output += f'<div class="text"><h2>Text {i+1}:</h2><p>'
         tokens = re.findall(r'\b\w+\b|[^\w\s]', text)
@@ -306,7 +367,14 @@ def generate_html(texts, word_counts, word_positions):
     """
     return html_output
 
-def main():
+async def get_continuation(request):
+    data = await request.json()
+    word = data['word']
+    context = data['context']
+    continuation = await get_ollama_continuation(word, context)
+    return web.json_response({'continuation': continuation})
+
+async def main():
     parser = argparse.ArgumentParser(description="Generate interactive intersecting texts visualization with HTML output, unique fonts, clickable links, variable word sizes, hover effects, and preserved punctuation.")
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('-f', '--file', type=str, help="Path to file containing texts (one per line)")
@@ -325,7 +393,23 @@ def main():
         f.write(html_code)
     
     print("Interactive HTML file 'intersecting_texts.html' has been generated.")
-    print("Open this file in a web browser to view the visualization.")
+    print("Starting web server...")
+
+    app = web.Application()
+    app.router.add_get('/', lambda request: web.FileResponse('intersecting_texts.html'))
+    app.router.add_post('/get_continuation', get_continuation)
+
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, 'localhost', 8080)
+    await site.start()
+
+    print("Server started at http://localhost:8080")
+    print("Press Ctrl+C to stop the server")
+
+    # Keep the server running
+    while True:
+        await asyncio.sleep(3600)
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
