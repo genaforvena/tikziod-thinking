@@ -1,4 +1,4 @@
-## How to Use the Interactive HTML Intersecting Texts Visualizer with Variable Word Sizes
+## How to Use the Interactive HTML Intersecting Texts Visualizer with Word Counters
 
 ### Basic Usage
 
@@ -43,6 +43,9 @@ After running the script:
 - Each input text is displayed as a separate paragraph, prefixed with "Text 1:", "Text 2:", etc.
 - Words that appear in more than one text are highlighted in bold and assigned a unique typeface.
 - The font size of each word is proportional to its frequency across all texts.
+- Above each word, there's a small counter showing two numbers:
+  - The left number indicates the current occurrence of the word within all texts.
+  - The right number shows the total occurrences of the word across all texts.
 - More frequent words appear larger, while less frequent words appear smaller.
 - The sizing uses a combination of linear and logarithmic scaling to ensure readability while still representing frequency differences.
 
@@ -51,6 +54,7 @@ After running the script:
 - Common words (those appearing in multiple texts) are clickable. When you click on a common word, the page will smoothly scroll to the next occurrence of that word in another text.
 - The target word is briefly highlighted in yellow when scrolled to, making it easy to locate.
 - You can continue clicking to cycle through all occurrences of the word across different texts.
+- As you click through occurrences, you'll see the left number in the counter change, helping you keep track of which occurrence you're viewing.
 
 ### Tips for Optimal Results
 
@@ -64,6 +68,7 @@ After running the script:
 
 - If you want to use different fonts, you can modify the `fonts` list in the script. Make sure to also update the Google Fonts link in the HTML template if you add new fonts.
 - You can adjust the `calculate_font_size` function in the script to change how word frequency affects font size.
+- The appearance of the counters can be modified by adjusting the CSS in the HTML template.
 
 ### Troubleshooting
 

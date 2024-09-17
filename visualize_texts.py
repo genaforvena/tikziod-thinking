@@ -56,9 +56,13 @@ def generate_html(texts, word_counts, word_positions):
             body { font-family: Arial, sans-serif; line-height: 1.6; padding: 20px; }
             h1 { color: #333; }
             .text { margin-bottom: 20px; }
-            .word { display: inline-block; vertical-align: middle; }
+            .word-container { display: inline-block; vertical-align: bottom; margin-right: 5px; text-align: center; }
+            .word { display: inline-block; }
             .common-word { font-weight: bold; cursor: pointer; }
             .common-word:hover { text-decoration: underline; }
+            .counter { font-size: 10px; color: #666; margin-bottom: -5px; }
+            .current { margin-right: 2px; }
+            .total { margin-left: 2px; }
         </style>
         <script>
             function jumpToWord(word, textIndex, position) {
@@ -83,14 +87,15 @@ def generate_html(texts, word_counts, word_positions):
             count = word_counts[word]
             font_size = calculate_font_size(count, min_count, max_count)
             font = word_fonts[word]
+            positions = word_positions[word]
+            current_index = positions.index((i, match.start())) + 1
+            html_output += f'<span class="word-container"><span class="counter"><span class="current">{current_index}</span>/<span class="total">{count}</span></span><br>'
             if count > 1:
-                positions = word_positions[word]
-                current_index = positions.index((i, match.start()))
-                next_index = (current_index + 1) % len(positions)
+                next_index = (positions.index((i, match.start())) + 1) % len(positions)
                 next_text_index, next_position = positions[next_index]
-                html_output += f'<span id="word-{word}-{i}-{match.start()}" class="word common-word" style="font-family: \'{font}\', sans-serif; font-size: {font_size}%;" onclick="jumpToWord(\'{word}\', {next_text_index}, {next_position})">{match.group()}</span> '
+                html_output += f'<span id="word-{word}-{i}-{match.start()}" class="word common-word" style="font-family: \'{font}\', sans-serif; font-size: {font_size}%;" onclick="jumpToWord(\'{word}\', {next_text_index}, {next_position})">{match.group()}</span></span> '
             else:
-                html_output += f'<span class="word" style="font-size: {font_size}%;">{match.group()}</span> '
+                html_output += f'<span class="word" style="font-size: {font_size}%;">{match.group()}</span></span> '
         html_output += '</p></div>'
     
     html_output += """
@@ -100,7 +105,7 @@ def generate_html(texts, word_counts, word_positions):
     return html_output
 
 def main():
-    parser = argparse.ArgumentParser(description="Generate interactive intersecting texts visualization with HTML output, unique fonts, clickable links, and variable word sizes.")
+    parser = argparse.ArgumentParser(description="Generate interactive intersecting texts visualization with HTML output, unique fonts, clickable links, variable word sizes, and occurrence counters.")
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('-f', '--file', type=str, help="Path to file containing texts (one per line)")
     group.add_argument('-t', '--texts', nargs='+', help="List of texts to visualize")
