@@ -1,17 +1,20 @@
 
 \documentclass{article}
-\usepackage{tikz}
 \usepackage[margin=1cm]{geometry}
-\begin{document}
-\begin{tikzpicture}[remember picture, overlay]
-\draw[red, opacity=0.5] (4.624443783786352,9.941719324675413) -- (4.719501069046038,5.968021819253115) -- (5.193204637464037,7.2243006489030215);
-\draw[blue, opacity=0.5] (4.624443783786352,9.941719324675413) -- (9.53305458389856,9.598262665276433) -- (5.193204637464037,7.2243006489030215);
-\draw[green, opacity=0.5] (4.624443783786352,9.941719324675413) -- (1.594483511019339,4.215754607447565) -- (5.193204637464037,7.2243006489030215);
-\node[normalsize] at (4.624443783786352,9.941719324675413) {text};
-\node[tiny] at (9.53305458389856,9.598262665276433) {second};
-\node[tiny] at (4.719501069046038,5.968021819253115) {first};
-\node[normalsize] at (5.193204637464037,7.2243006489030215) {here};
-\node[tiny] at (1.594483511019339,4.215754607447565) {third};
+\usepackage{xcolor}
+\usepackage[normalem]{ulem}
+\usepackage{soul}
 
-\end{tikzpicture}
+\begin{document}
+
+\section*{Intersecting Texts Visualization}
+
+\textbf{Text 1:} It appears that \textcolor{brown}{\uline{the}} \textcolor{purple}{\uline{script}} interpreted \textcolor{pink}{\uline{each}} word \textcolor{cyan}{\uline{as}} \textcolor{orange}{\uline{a}} separate \textcolor{magenta}{\uline{text}} 
+
+\textbf{Text 2:} rather than treating \textcolor{pink}{\uline{each}} quoted phrase \textcolor{cyan}{\uline{as}} \textcolor{orange}{\uline{a}} single \textcolor{magenta}{\uline{text}} 
+
+\textbf{Text 3:} \textcolor{cyan}{\uline{This}} could happen if \textcolor{brown}{\uline{the}} quotes were not properly handled by \textcolor{brown}{\uline{the}} command line or \textcolor{brown}{\uline{the}} \textcolor{purple}{\uline{script}} 
+
+\textbf{Text 4:} Let s modify \textcolor{brown}{\uline{the}} \textcolor{purple}{\uline{script}} to handle \textcolor{cyan}{\uline{this}} issue 
+
 \end{document}

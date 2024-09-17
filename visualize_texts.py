@@ -1,8 +1,7 @@
 import re
 from collections import defaultdict
-import random
 import argparse
-import shlex
+import random
 
 def read_file(file_path):
     with open(file_path, 'r') as file:
@@ -10,7 +9,7 @@ def read_file(file_path):
 
 def process_texts(texts):
     # Normalize and tokenize texts
-    word_sets = [set(re.findall(r'\w+', text.lower())) for text in texts]
+    word_sets = [set(re.findall(r'\b\w+\b', text.lower())) for text in texts]
     
     # Find common words
     all_words = set.union(*word_sets)
@@ -18,59 +17,60 @@ def process_texts(texts):
     for word in all_words:
         word_counts[word] = sum(word in s for s in word_sets)
     
-    # Assign positions (simplified for demonstration)
-    positions = {}
-    for word in all_words:
-        positions[word] = (random.uniform(0, 10), random.uniform(0, 10))
-    
-    return word_sets, word_counts, positions
+    return word_sets, word_counts
 
-def generate_latex(texts, word_sets, word_counts, positions):
+def generate_latex(texts, word_counts):
     latex_output = r"""
 \documentclass{article}
-\usepackage{tikz}
 \usepackage[margin=1cm]{geometry}
+\usepackage{xcolor}
+\usepackage[normalem]{ulem}
+\usepackage{soul}
+
 \begin{document}
-\begin{tikzpicture}[remember picture, overlay]
+
+\section*{Intersecting Texts Visualization}
+
 """
     
-    # Draw lines for each text
-    colors = ['red', 'blue', 'green', 'orange', 'purple']
-    for i, words in enumerate(word_sets):
-        path = []
+    # Define colors for highlighting
+    colors = ['red', 'blue', 'green', 'orange', 'purple', 'cyan', 'magenta', 'yellow', 'brown', 'pink']
+    word_colors = {}
+    
+    # Assign colors to common words
+    for word, count in word_counts.items():
+        if count > 1:
+            word_colors[word] = random.choice(colors)
+    
+    # Add texts with highlighted common words
+    for i, text in enumerate(texts):
+        latex_output += f"\\textbf{{Text {i+1}:}} "
+        words = re.findall(r'\b\w+\b', text)
         for word in words:
-            x, y = positions[word]
-            path.append(f"({x},{y})")
-        
-        color = colors[i % len(colors)]
-        latex_output += f"\\draw[{color}, opacity=0.5] {' -- '.join(path)};\n"
+            if word.lower() in word_colors:
+                color = word_colors[word.lower()]
+                latex_output += f"\\textcolor{{{color}}}{{\\uline{{{word}}}}} "
+            else:
+                latex_output += f"{word} "
+        latex_output += "\n\n"
     
-    # Place words
-    for word, (x, y) in positions.items():
-        size = 'tiny' if word_counts[word] == 1 else 'small' if word_counts[word] == 2 else 'normalsize'
-        latex_output += f"\\node[{size}] at ({x},{y}) {{{word}}};\n"
-    
-    latex_output += r"""
-\end{tikzpicture}
-\end{document}
-"""
+    latex_output += r"\end{document}"
     return latex_output
 
 def main():
-    parser = argparse.ArgumentParser(description="Generate intersecting texts visualization.")
+    parser = argparse.ArgumentParser(description="Generate intersecting texts visualization with highlighted connections.")
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('-f', '--file', type=str, help="Path to file containing texts (one per line)")
-    group.add_argument('-t', '--texts', type=str, help="Quoted texts to visualize, separated by spaces")
+    group.add_argument('-t', '--texts', nargs='+', help="List of texts to visualize")
     args = parser.parse_args()
 
     if args.file:
         texts = read_file(args.file)
     else:
-        # Use shlex.split to properly handle quoted arguments
-        texts = shlex.split(args.texts)
+        texts = args.texts
 
-    word_sets, word_counts, positions = process_texts(texts)
-    latex_code = generate_latex(texts, word_sets, word_counts, positions)
+    word_sets, word_counts = process_texts(texts)
+    latex_code = generate_latex(texts, word_counts)
 
     with open('intersecting_texts.tex', 'w') as f:
         f.write(latex_code)
