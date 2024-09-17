@@ -1,8 +1,8 @@
-## How to Use the Intersecting Texts Visualizer
+## How to Use the HTML Intersecting Texts Visualizer with Unique Fonts
 
 ### Basic Usage
 
-The script now supports two methods of input: file input and direct text input via command line.
+The script supports two methods of input: file input and direct text input via command line.
 
 #### File Input
 
@@ -22,75 +22,47 @@ The script now supports two methods of input: file input and direct text input v
 
 #### Direct Text Input
 
-You can also provide texts directly as command-line arguments:
+You can provide texts directly as command-line arguments. Make sure to enclose each text in quotes:
 
 ```
 python visualize_texts.py -t "First text here" "Second text here" "Third text here"
 ```
 
-### Generating the Visualization
+### Viewing the Visualization
 
-After running the script with either input method:
+After running the script:
 
-1. The script will generate a LaTeX file named `intersecting_texts.tex`.
+1. An HTML file named `intersecting_texts.html` will be generated in the same directory.
 
-2. Compile the LaTeX file to create a PDF:
+2. Open this file in any modern web browser to view the visualization.
 
-   ```
-   pdflatex intersecting_texts.tex
-   ```
+3. Ensure you have an internet connection when viewing the HTML file, as it uses Google Fonts.
 
-3. Open the resulting `intersecting_texts.pdf` to view your visualization.
+### Understanding the Output
 
-### Advanced Usage
+- Each input text is displayed as a separate paragraph, prefixed with "Text 1:", "Text 2:", etc.
+- Words that appear in more than one text are highlighted in bold and assigned a unique typeface.
+- The varying typefaces make it easy to spot the same word across different texts.
 
-#### Changing Word Positioning
+### Tips for Optimal Results
 
-You can modify the `positions` dictionary in the `process_texts` function to change how words are positioned. For example, to position words in a circle:
+1. **Input Text Length**: The visualization works best with texts that are neither too short nor too long. Aim for sentences or short paragraphs.
 
-```python
-import math
+2. **Number of Texts**: The script can handle multiple texts, but for clarity, it's best to use 2-5 texts at a time.
 
-def process_texts(texts):
-    # ... (earlier part of the function remains the same)
+3. **Common Words**: The visualization is most effective when there are some common words between the texts, but not too many. This creates interesting connections without overwhelming the reader with too many font changes.
 
-    # Assign positions in a circle
-    num_words = len(all_words)
-    for i, word in enumerate(all_words):
-        angle = 2 * math.pi * i / num_words
-        x = 5 + 4 * math.cos(angle)  # Center at (5,5) with radius 4
-        y = 5 + 4 * math.sin(angle)
-        positions[word] = (x, y)
+### Customization
 
-    return word_sets, word_counts, positions
-```
+- If you want to use different fonts, you can modify the `fonts` list in the script. Make sure to also update the Google Fonts link in the HTML template if you add new fonts.
 
-#### Customizing the Visualization
+### Troubleshooting
 
-You can modify the LaTeX code in the `generate_latex` function to change the appearance of the visualization. For instance, to change line thickness and word colors:
+If you encounter any issues:
 
-```python
-def generate_latex(texts, word_sets, word_counts, positions):
-    # ... (beginning of the function remains the same)
-    
-    # Draw thicker lines for each text
-    colors = ['red', 'blue', 'green', 'orange', 'purple']
-    for i, words in enumerate(word_sets):
-        path = []
-        for word in words:
-            x, y = positions[word]
-            path.append(f"({x},{y})")
-        
-        color = colors[i % len(colors)]
-        latex_output += f"\\draw[{color}, opacity=0.5, line width=2pt] {' -- '.join(path)};\n"
-    
-    # Place words with varying colors
-    for word, (x, y) in positions.items():
-        size = 'tiny' if word_counts[word] == 1 else 'small' if word_counts[word] == 2 else 'normalsize'
-        color = colors[word_counts[word] % len(colors)]
-        latex_output += f"\\node[{size}, text={color}] at ({x},{y}) {{{word}}};\n"
-    
-    # ... (rest of the function remains the same)
-```
+1. Ensure you're using the latest version of the script.
+2. Check that you have a modern web browser to view the HTML file.
+3. Make sure you have an active internet connection to load the Google Fonts.
+4. If some fonts are not displaying correctly, try clearing your browser cache or using a different browser.
 
-Remember to experiment and adjust these settings to achieve the desired visual effect for your specific texts!
+If you need to convert the HTML to PDF, you can use various online tools or browser extensions that allow you to save web pages as PDFs. Note that some fonts might not render correctly in PDFs, depending on the conversion method used.
