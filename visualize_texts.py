@@ -39,6 +39,7 @@ def calculate_font_size(count, min_count, max_count):
         log_count = math.log(count)
         return 80 + (log_count - log_min) / (log_max - log_min) * 60
 
+
 def generate_html(texts, word_counts, word_positions):
     fonts = [
         'Roboto', 'Open Sans', 'Lato', 'Montserrat', 'Raleway', 'Oswald', 
@@ -73,7 +74,6 @@ def generate_html(texts, word_counts, word_positions):
                 margin-right: 5px; 
                 text-align: center; 
                 position: relative;
-                padding-top: 20px; /* Space for the counter and button */
             }}
             .word {{ display: inline-block; }}
             .common-word {{ font-weight: bold; text-decoration: none; color: inherit; }}
@@ -83,7 +83,7 @@ def generate_html(texts, word_counts, word_positions):
                 font-size: 10px; 
                 color: #666; 
                 position: absolute; 
-                top: 0; 
+                top: -15px; 
                 left: 50%; 
                 transform: translateX(-50%); 
                 white-space: nowrap;
@@ -92,43 +92,44 @@ def generate_html(texts, word_counts, word_positions):
                 border: 1px solid #ddd;
                 border-radius: 3px;
             }}
-            .hide-button {{ 
+            #word-actions {{ 
                 display: none; 
-                font-size: 10px; 
-                background-color: #f44336; 
+                position: fixed;
+                z-index: 1000;
+            }}
+            #word-actions button {{ 
+                font-size: 12px; 
                 color: white; 
                 border: none; 
                 cursor: pointer; 
-                padding: 2px 5px; 
-                position: absolute;
-                top: 0;
-                right: 0;
-                z-index: 10;
+                padding: 5px 10px; 
+                margin-right: 5px;
             }}
+            #hide-button {{ background-color: #f44336; }}
+            #strikeout-button {{ background-color: #4CAF50; }}
             .punctuation {{ display: inline-block; vertical-align: bottom; margin-right: 5px; }}
             .highlight {{ 
                 background-color: #FFFF00; 
                 box-shadow: 0 0 5px #FFFF00;
             }}
-            .hidden {{ display: none; }}
-            .next-occurrences {{ 
+            .hidden {{ display: none !important; }}
+            .strikeout {{ text-decoration: line-through; }}
+            .next-entry {{ 
                 display: none; 
                 position: absolute; 
-                bottom: -50px; 
+                bottom: -30px; 
                 left: 50%; 
                 transform: translateX(-50%); 
                 background-color: white; 
                 border: 1px solid #ddd; 
                 padding: 5px; 
-                max-height: 100px; 
-                overflow-y: auto; 
                 z-index: 1000;
+                white-space: nowrap;
             }}
-            .next-occurrence {{ cursor: pointer; padding: 2px 5px; }}
-            .next-occurrence:hover {{ background-color: #f0f0f0; }}
         </style>
         <script>
         const wordPositions = {word_positions_json};
+        let currentWord = null;
 
         function supportsNativeSmoothScroll() {{
             return 'scrollBehavior' in document.documentElement.style;
@@ -146,9 +147,7 @@ def generate_html(texts, word_counts, word_positions):
 
         function showCounter(element) {{
             const counter = element.querySelector('.counter');
-            const hideButton = element.querySelector('.hide-button');
             if (counter) counter.style.display = 'block';
-            if (hideButton) hideButton.style.display = 'block';
         }}
 
         function hideCounter(element) {{
@@ -174,47 +173,69 @@ def generate_html(texts, word_counts, word_positions):
             }});
         }}
 
-        function showNextOccurrences(element, word) {{
+        function strikeoutWord(word) {{
+            const elements = document.querySelectorAll(`[data-word="${{word}}"]`);
+            elements.forEach(el => {{
+                el.classList.add('strikeout');
+            }});
+        }}
+
+        function showNextEntry(element, word) {{
             const positions = wordPositions[word];
             const currentTextIndex = parseInt(element.id.split('-')[2]);
             const currentPosition = parseInt(element.id.split('-')[3]);
             
-            let nextOccurrences = positions.filter(pos => 
+            let nextEntry = positions.find(pos => 
                 pos[0] > currentTextIndex || (pos[0] === currentTextIndex && pos[1] > currentPosition)
             );
-            if (nextOccurrences.length === 0) {{
-                nextOccurrences = positions.slice(0, 5);
-            }} else if (nextOccurrences.length > 5) {{
-                nextOccurrences = nextOccurrences.slice(0, 5);
+            if (!nextEntry) {{
+                nextEntry = positions[0];
             }}
-            
-            let occurrencesHtml = '<div class="next-occurrences">';
-            nextOccurrences.forEach(pos => {{
-                occurrencesHtml += `<div class="next-occurrence" onclick="smoothScroll('#word-${{word}}-${{pos[0]}}-${{pos[1]}}')">Text ${{pos[0] + 1}}</div>`;
-            }});
-            occurrencesHtml += '</div>';
-            
-            element.parentNode.insertAdjacentHTML('beforeend', occurrencesHtml);
+
+            let nextEntryHtml = `<div class="next-entry">Next: Text ${{nextEntry[0] + 1}}</div>`;
+            element.parentNode.insertAdjacentHTML('beforeend', nextEntryHtml);
         }}
 
-        function hideNextOccurrences(element) {{
-            const nextOccurrences = element.parentNode.querySelector('.next-occurrences');
-            if (nextOccurrences) {{
-                nextOccurrences.remove();
+        function hideNextEntry(element) {{
+            const nextEntry = element.parentNode.querySelector('.next-entry');
+            if (nextEntry) {{
+                nextEntry.remove();
             }}
+        }}
+
+        function showWordActions(word, x, y) {{
+            const wordActions = document.getElementById('word-actions');
+            wordActions.style.display = 'block';
+            wordActions.style.left = `${{x}}px`;
+            wordActions.style.top = `${{y + 20}}px`;  // 20px below the word
+            currentWord = word;
         }}
 
         document.addEventListener('DOMContentLoaded', function() {{
+            const wordActions = document.createElement('div');
+            wordActions.id = 'word-actions';
+            const hideButton = document.createElement('button');
+            hideButton.id = 'hide-button';
+            hideButton.textContent = 'Hide';
+            const strikeoutButton = document.createElement('button');
+            strikeoutButton.id = 'strikeout-button';
+            strikeoutButton.textContent = 'Strike-out';
+            wordActions.appendChild(hideButton);
+            wordActions.appendChild(strikeoutButton);
+            document.body.appendChild(wordActions);
+
             const commonWords = document.querySelectorAll('.common-word');
             commonWords.forEach(word => {{
-                word.addEventListener('mouseover', function() {{
+                word.addEventListener('mouseover', function(e) {{
                     showCounter(this.parentNode);
                     highlightWords(this.dataset.word);
-                    showNextOccurrences(this, this.dataset.word);
+                    showNextEntry(this, this.dataset.word);
+                    showWordActions(this.dataset.word, e.pageX, e.pageY);
                 }});
                 word.addEventListener('mouseout', function() {{
+                    hideCounter(this.parentNode);
                     unhighlightWords(this.dataset.word);
-                    hideNextOccurrences(this);
+                    hideNextEntry(this);
                 }});
                 word.addEventListener('click', function(e) {{
                     if (!supportsNativeSmoothScroll()) {{
@@ -224,26 +245,24 @@ def generate_html(texts, word_counts, word_positions):
                 }});
             }});
 
-            const hideButtons = document.querySelectorAll('.hide-button');
-            hideButtons.forEach(button => {{
-                button.addEventListener('click', function(e) {{
-                    e.stopPropagation();
-                    hideWord(this.dataset.word);
-                }});
+            hideButton.addEventListener('click', function() {{
+                if (currentWord) {{
+                    hideWord(currentWord);
+                    wordActions.style.display = 'none';
+                }}
             }});
 
-            // Keep counters and buttons visible when hovering over them
-            const wordContainers = document.querySelectorAll('.word-container');
-            wordContainers.forEach(container => {{
-                container.addEventListener('mouseover', function() {{
-                    showCounter(this);
-                }});
-                container.addEventListener('mouseout', function(e) {{
-                    // Check if the mouse is still over the counter or button
-                    if (!e.relatedTarget || !this.contains(e.relatedTarget)) {{
-                        hideCounter(this);
-                    }}
-                }});
+            strikeoutButton.addEventListener('click', function() {{
+                if (currentWord) {{
+                    strikeoutWord(currentWord);
+                    wordActions.style.display = 'none';
+                }}
+            }});
+
+            document.addEventListener('click', function(e) {{
+                if (!e.target.closest('.common-word') && !e.target.closest('#word-actions')) {{
+                    wordActions.style.display = 'none';
+                }}
             }});
         }});
         </script>
@@ -266,7 +285,6 @@ def generate_html(texts, word_counts, word_positions):
                 current_index = sum(1 for pos in positions if pos <= (i, current_position)) + 1
                 html_output += f'<span class="word-container">'
                 html_output += f'<span class="counter"><span class="current">{current_index}</span>/<span class="total">{count}</span></span>'
-                html_output += f'<button class="hide-button" data-word="{html.escape(word)}">Hide</button>'
                 if count > 1:
                     next_positions = [pos for pos in positions if pos > (i, current_position)]
                     if next_positions:
