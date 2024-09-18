@@ -35,7 +35,7 @@ def generate_html(texts, word_counts, word_positions):
     
     text_html = ""
     for i, text in enumerate(texts):
-        text_html += f'<div class="text"><h2>Text {i+1}:</h2><p>'
+        text_html += f'<div class="text"><p>'
         tokens = re.findall(r'\b\w+\b|[^\w\s]', text)
         current_position = 0
         for token in tokens:
