@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Intersecting Texts Visualization</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&family=Open+Sans&family=Lato&family=Montserrat&family=Raleway&family=Oswald&family=Merriweather&family=Playfair+Display&family=Nunito&family=Quicksand&family=Poppins&family=Archivo&family=Fira+Sans&family=Josefin+Sans&family=Comfortaa&family=Caveat&family=Pacifico&display=swap" rel="stylesheet">
+    <style>
+        html {{
+            scroll-behavior: smooth;
+        }}
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; padding: 20px; }}
+        h1 {{ color: #333; }}
+        .text {{ margin-bottom: 20px; }}
+        .word-container {{ 
+            display: inline-block; 
+            vertical-align: bottom; 
+            margin-right: 5px; 
+            text-align: center; 
+            position: relative;
+        }}
+        .word {{ display: inline-block; }}
+        .common-word {{ font-weight: bold; text-decoration: none; color: inherit; }}
+        .common-word:hover {{ text-decoration: underline; }}
+        .counter {{ 
+            display: none; 
+            font-size: 10px; 
+            color: #666; 
+            position: absolute; 
+            top: -15px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            white-space: nowrap;
+            background-color: white;
+            padding: 2px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }}
+        #word-actions {{ 
+            display: none; 
+            position: fixed;
+            z-index: 1000;
+        }}
+        #word-actions button {{ 
+            font-size: 12px; 
+            color: white; 
+            border: none; 
+            cursor: pointer; 
+            padding: 5px 10px; 
+            margin-right: 5px;
+        }}
+        #hide-button {{ background-color: #f44336; }}
+        #strikeout-button {{ background-color: #4CAF50; }}
+        #continue-button {{ background-color: #2196F3; }}
+        .punctuation {{ display: inline-block; vertical-align: bottom; margin-right: 5px; }}
+        .highlight {{ 
+            background-color: #FFFF00; 
+            box-shadow: 0 0 5px #FFFF00;
+        }}
+        .hidden {{ display: none !important; }}
+        .strikeout {{ text-decoration: line-through; }}
+        .next-entry {{ 
+            display: none; 
+            position: absolute; 
+            bottom: -30px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            background-color: white; 
+            border: 1px solid #ddd; 
+            padding: 5px; 
+            z-index: 1000;
+            white-space: nowrap;
+        }}
+        #continuation-result {{
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background-color: white;
+            border: 1px solid #ddd;
+            padding: 10px;
+            z-index: 1001;
+            max-height: 200px;
+            overflow-y: auto;
+        }}
+        #frequency-slider-container {{
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background-color: white;
+            padding: 10px;
+            border: 1px solid #ddd;
+            z-index: 1000;
+        }}
+        #frequency-slider {{
+            width: 100%;
+        }}
+    </style>
+</head>
+<body>
+    <h1>Interactive Intersecting Texts Visualization</h1>
+    {text_content}
+    <div id="word-actions"></div>
+    <div id="continuation-result"></div>
+    <div id="frequency-slider-container">
+        <input type="range" id="frequency-slider" min="0" max="100" value="0">
+    </div>
+    <script>
+        const wordPositions = {word_positions_json};
+        const wordCounts = {word_counts_json};
+    </script>
+    <script src="static/js/interactive.js"></script>
+</body>
+</html>

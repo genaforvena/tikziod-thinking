@@ -19,7 +19,7 @@ The script supports two methods of input: file input and direct text input via c
 2. Run the script with the file input option:
 
    ```
-   python visualize_texts.py -f input.txt
+   python main.py -f input.txt
    ```
 
 #### Direct Text Input
@@ -27,7 +27,7 @@ The script supports two methods of input: file input and direct text input via c
 You can provide texts directly as command-line arguments. Make sure to enclose each text in quotes:
 
 ```
-python visualize_texts.py -t "First text here" "Second text here" "Third text here"
+python main.py -t "First text here" "Second text here" "Third text here"
 ```
 
 ### Viewing the Visualization
