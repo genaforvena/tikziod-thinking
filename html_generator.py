@@ -62,9 +62,4 @@ def generate_html(texts, word_counts, word_positions):
                 text_html += f'<span class="punctuation">{html.escape(token)}</span>'
             current_position += len(token) + 1
         text_html += '</p></div>'
-    
-    return template.format(
-        word_positions_json=word_positions_json,
-        word_counts_json=word_counts_json,
-        text_content=text_html
-    )
+    return template.format(word_positions_json=word_positions_json, word_counts_json=word_counts_json, text_content=text_html)
