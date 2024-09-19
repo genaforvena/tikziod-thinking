@@ -107,7 +107,6 @@ function goToNextOccurrence(word) {
 function updateWordVisibility(threshold) {
     const hiddenWords = [];
     let totalHidden = 0;
-    const fragment = document.createDocumentFragment();
 
     sortedWords.forEach((entry, index) => {
         const [word, count] = entry;
@@ -115,20 +114,15 @@ function updateWordVisibility(threshold) {
         if (index < threshold) {
             elements.forEach(el => {
                 el.classList.add('hidden');
-                fragment.appendChild(el.parentNode.removeChild(el));
             });
             hiddenWords.push(`${word} (${count})`);
             totalHidden += count;
         } else if (elements[0] && elements[0].classList.contains('hidden')) {
             elements.forEach(el => {
                 el.classList.remove('hidden');
-                fragment.appendChild(el.parentNode.removeChild(el));
             });
         }
     });
-
-    // Reinsert all modified elements in one batch operation
-    document.querySelector('.text').appendChild(fragment);
 
     updateHiddenWordsPopup(hiddenWords);
     updateSliderValue(totalHidden);
