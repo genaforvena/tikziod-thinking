@@ -19,7 +19,7 @@ async def start_server():
     app = web.Application()
     app.router.add_get('/', lambda request: web.FileResponse('intersecting_texts.html'))
     app.router.add_post('/get_continuation', get_continuation)
-    app.router.add_static('/static', 'static')
+    app.router.add_static('/static', 'docs/static')
 
     runner = web.AppRunner(app)
     await runner.setup()
