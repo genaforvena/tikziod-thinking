@@ -1,13 +1,14 @@
 let selectedWords = new Map();
 let colorIndex = 0;
 const colors = ['highlight-0', 'highlight-1', 'highlight-2', 'highlight-3', 'highlight-4'];
+let sortedWords = [];
 let wordElements = new Map();
 
 function toggleWordSelection(word, element) {
     if (selectedWords.has(word)) {
         unhighlightWord(word);
         selectedWords.delete(word);
-        removeWordActions(word);
+        removeWordControls(word);
     } else {
         highlightWord(word);
         selectedWords.set(word, {
@@ -16,7 +17,7 @@ function toggleWordSelection(word, element) {
             currentIndex: 0
         });
         colorIndex = (colorIndex + 1) % colors.length;
-        showWordActions(word, element);
+        showWordControls(word);
     }
     updateCounters();
 }
@@ -47,53 +48,6 @@ function hideCounter(element) {
     if (counter) counter.style.display = 'none';
 }
 
-function showWordActions(word, element) {
-    const wordActions = document.createElement('div');
-    wordActions.className = 'word-actions';
-    wordActions.id = `actions-${word}`;
-    const removeButton = createButton('Remove', 'remove-button', () => removeWord(word));
-    const strikeoutButton = createButton('Strikeout', 'strikeout-button', () => strikeoutWord(word));
-    const nextButton = createButton('Next', 'next-button', () => goToNextOccurrence(word));
-    wordActions.appendChild(removeButton);
-    wordActions.appendChild(strikeoutButton);
-    wordActions.appendChild(nextButton);
-    document.body.appendChild(wordActions);
-    const rect = element.getBoundingClientRect();
-    wordActions.style.left = `${rect.left}px`;
-    wordActions.style.top = `${rect.bottom + window.scrollY + 5}px`;
-    wordActions.style.display = 'block';
-}
-function createButton(text, className, onClick) {
-    const button = document.createElement('button');
-    button.textContent = text;
-    button.className = className;
-    button.addEventListener('click', onClick);
-    return button;
-}
-function removeWordActions(word) {
-    const actions = document.getElementById(`actions-${word}`);
-    if (actions) actions.remove();
-}
-function removeWord(word) {
-    const elements = document.querySelectorAll(`[data-word="${word}"]`);
-    elements.forEach(el => el.classList.add('hidden'));
-    unhighlightWord(word);
-    selectedWords.delete(word);
-    removeWordActions(word);
-}
-function strikeoutWord(word) {
-    const elements = document.querySelectorAll(`[data-word="${word}"]`);
-    elements.forEach(el => el.classList.add('strikeout'));
-}
-function goToNextOccurrence(word) {
-    const info = selectedWords.get(word);
-    if (info) {
-        info.currentIndex = (info.currentIndex + 1) % info.elements.length;
-        const nextElement = info.elements[info.currentIndex];
-        nextElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-}
-
 function updateCounters() {
     selectedWords.forEach((info, word) => {
         info.elements.forEach((el, index) => {
@@ -106,53 +60,151 @@ function updateCounters() {
     });
 }
 
+function showWordControls(word) {
+    const controlsContainer = document.getElementById('word-controls');
+    const wordControls = document.createElement('div');
+    wordControls.id = `controls-${word}`;
+    wordControls.innerHTML = `
+        <span>${word}: </span>
+        <button class="remove-button">Remove</button>
+        <button class="strikeout-button">Strikeout</button>
+        <button class="next-button">Next</button>
+    `;
+    controlsContainer.appendChild(wordControls);
+
+    wordControls.querySelector('.remove-button').addEventListener('click', () => removeWord(word));
+    wordControls.querySelector('.strikeout-button').addEventListener('click', () => strikeoutWord(word));
+    wordControls.querySelector('.next-button').addEventListener('click', () => goToNextOccurrence(word));
+}
+
+function removeWordControls(word) {
+    const controls = document.getElementById(`controls-${word}`);
+    if (controls) controls.remove();
+}
+
+function removeWord(word) {
+    const elements = wordElements.get(word) || [];
+    elements.forEach(el => el.classList.add('hidden'));
+    unhighlightWord(word);
+    selectedWords.delete(word);
+    removeWordControls(word);
+}
+
+function strikeoutWord(word) {
+    const elements = wordElements.get(word) || [];
+    elements.forEach(el => el.classList.add('strikeout'));
+}
+
+function goToNextOccurrence(word) {
+    const info = selectedWords.get(word);
+    if (info) {
+        info.currentIndex = (info.currentIndex + 1) % info.elements.length;
+        const nextElement = info.elements[info.currentIndex];
+        nextElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+}
+
 function updateWordVisibility(threshold) {
-    const sortedWords = Object.entries(wordCounts).sort((a, b) => a[1] - b[1]);
-    const totalWords = sortedWords.length;
-    const visibleCount = Math.floor(totalWords * (1 - threshold));
-    
-    // Use requestAnimationFrame for smoother updates
-    requestAnimationFrame(() => {
-        sortedWords.forEach((entry, index) => {
-            const [word, count] = entry;
-            const elements = wordElements.get(word) || [];
-            const shouldHide = index >= visibleCount;
-            elements.forEach(el => el.classList.toggle('hidden', shouldHide));
-        });
+    const hiddenWords = [];
+    let totalHidden = 0;
+    const fragment = document.createDocumentFragment();
+
+    sortedWords.forEach((entry, index) => {
+        const [word, count] = entry;
+        const elements = wordElements.get(word) || [];
+        if (index < threshold) {
+            elements.forEach(el => {
+                el.classList.add('hidden');
+                fragment.appendChild(el.parentNode.removeChild(el));
+            });
+            hiddenWords.push(`${word} (${count})`);
+            totalHidden += count;
+        } else if (elements[0] && elements[0].classList.contains('hidden')) {
+            elements.forEach(el => {
+                el.classList.remove('hidden');
+                fragment.appendChild(el.parentNode.removeChild(el));
+            });
+        }
     });
+
+    // Reinsert all modified elements in one batch operation
+    document.querySelector('.text').appendChild(fragment);
+
+    updateHiddenWordsPopup(hiddenWords);
+    updateSliderValue(totalHidden);
+}
+
+function updateHiddenWordsPopup(hiddenWords) {
+    const popup = document.getElementById('hidden-words-popup');
+    if (hiddenWords.length > 0) {
+        popup.innerHTML = `<h3>Hidden Words:</h3><p>${hiddenWords.join(', ')}</p>`;
+        popup.style.display = 'block';
+    } else {
+        popup.style.display = 'none';
+    }
+}
+
+function updateSliderValue(totalHidden) {
+    const sliderValue = document.getElementById('slider-value');
+    sliderValue.textContent = `Hidden: ${totalHidden}`;
+}
+
+function updateHiddenWordsPopup(hiddenWords) {
+    const popup = document.getElementById('hidden-words-popup');
+    const content = document.getElementById('hidden-words-content');
+    if (hiddenWords.length > 0) {
+        content.innerHTML = `<h3>Hidden Words:</h3><p>${hiddenWords.join(', ')}</p>`;
+        popup.style.display = 'block';
+    } else {
+        popup.style.display = 'none';
+    }
+}
+
+function closeHiddenWordsPopup() {
+    const popup = document.getElementById('hidden-words-popup');
+    popup.style.display = 'none';
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Cache all word elements
-    document.querySelectorAll('.common-word').forEach(word => {
+    const commonWords = document.querySelectorAll('.common-word');
+    commonWords.forEach(word => {
         const wordText = word.dataset.word;
         if (!wordElements.has(wordText)) {
             wordElements.set(wordText, []);
         }
         wordElements.get(wordText).push(word);
-        
+
         word.addEventListener('click', function(e) {
             e.preventDefault();
             toggleWordSelection(this.dataset.word, this);
         });
     });
 
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.common-word') && !e.target.closest('#word-controls')) {
+            selectedWords.forEach((info, word) => {
+                removeWordControls(word);
+            });
+        }
+    });
+    
+    const closePopupButton = document.getElementById('close-popup');
+    closePopupButton.addEventListener('click', closeHiddenWordsPopup);
+
     const slider = document.getElementById('frequency-slider');
-    let debounceTimer;
+    sortedWords = Object.entries(wordCounts).sort((a, b) => b[1] - a[1]);
+    slider.max = sortedWords.length;
+
     slider.addEventListener('input', function() {
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(() => {
-            const threshold = this.value / 100;
-            updateWordVisibility(threshold);
-        }, 50); // Debounce for 50ms
+        const threshold = parseInt(this.value);
+        updateWordVisibility(threshold);
     });
 
     document.addEventListener('click', function(e) {
-        if (!e.target.closest('.common-word') && !e.target.closest('.word-actions')) {
+        if (!e.target.closest('.common-word') && !e.target.closest('#word-controls')) {
             selectedWords.forEach((info, word) => {
-                removeWordActions(word);
+                removeWordControls(word);
             });
         }
     });
 });
-

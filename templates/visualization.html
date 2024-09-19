@@ -33,25 +33,6 @@
             border: 1px solid #ddd;
             border-radius: 3px;
         }}
-        .word-actions {{
-            display: none; 
-            position: fixed;
-            z-index: 1000;
-            background-color: white;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            padding: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }}
-        .word-actions button {{
-            font-size: 12px; 
-            color: white; 
-            border: none; 
-            cursor: pointer; 
-            padding: 5px 10px; 
-            margin-right: 5px;
-            border-radius: 3px;
-        }}
         .remove-button {{background-color: #f44336; }}
         .strikeout-button {{background-color: #4CAF50; }}
         .next-button {{background-color: #2196F3; }}
@@ -63,6 +44,47 @@
         .highlight-4 {{background-color: #FFA500; }}
         .hidden {{display: none !important; }}
         .strikeout {{text-decoration: line-through; }}
+    #control-panel {{
+            position: fixed;
+            bottom: 60px;
+            left: 20px;
+            right: 20px;
+            background-color: white;
+            padding: 10px;
+            border: 1px solid #ddd;
+            z-index: 1000;
+    }}
+    #word-controls {{
+            margin-bottom: 10px;
+    }}
+    #word-controls button {{
+            margin-right: 5px;
+    }}
+    #hidden-words-popup {{
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            border: 1px solid #ddd;
+            padding: 20px;
+            max-width: 80%;
+            max-height: 80%;
+            overflow-y: auto;
+            z-index: 1001;
+            display: none;
+    }}
+    #close-popup {{
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+            font-size: 20px;
+            color: #666;
+    }}
+    #close-popup:hover {{
+            color: #000;
+    }}
         #frequency-slider-container {{
             position: fixed;
             bottom: 20px;
@@ -78,10 +100,16 @@
 </head>
 <body>
     {text_content}
-    <div id="word-actions"></div>
-    <div id="continuation-result"></div>
-    <div id="frequency-slider-container">
-        <input type="range" id="frequency-slider" min="0" max="100" value="0">
+    <div id="control-panel">
+        <div id="word-controls"></div>
+        <div id="frequency-slider-container">
+            <input type="range" id="frequency-slider" min="0" max="100" value="0">
+            <span id="slider-value"></span>
+        </div>
+    </div>
+    <div id="hidden-words-popup">
+        <span id="close-popup">&times;</span>
+        <div id="hidden-words-content"></div>
     </div>
     <script>
         const wordPositions = {word_positions_json};
