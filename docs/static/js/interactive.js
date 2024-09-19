@@ -47,6 +47,65 @@ function hideCounter(element) {
     if (counter) counter.style.display = 'none';
 }
 
+function showWordActions(word, element) {
+    const wordActions = document.createElement('div');
+    wordActions.className = 'word-actions';
+    wordActions.id = `actions-${word}`;
+    const removeButton = createButton('Remove', 'remove-button', () => removeWord(word));
+    const strikeoutButton = createButton('Strikeout', 'strikeout-button', () => strikeoutWord(word));
+    const nextButton = createButton('Next', 'next-button', () => goToNextOccurrence(word));
+    wordActions.appendChild(removeButton);
+    wordActions.appendChild(strikeoutButton);
+    wordActions.appendChild(nextButton);
+    document.body.appendChild(wordActions);
+    const rect = element.getBoundingClientRect();
+    wordActions.style.left = `${rect.left}px`;
+    wordActions.style.top = `${rect.bottom + window.scrollY + 5}px`;
+    wordActions.style.display = 'block';
+}
+function createButton(text, className, onClick) {
+    const button = document.createElement('button');
+    button.textContent = text;
+    button.className = className;
+    button.addEventListener('click', onClick);
+    return button;
+}
+function removeWordActions(word) {
+    const actions = document.getElementById(`actions-${word}`);
+    if (actions) actions.remove();
+}
+function removeWord(word) {
+    const elements = document.querySelectorAll(`[data-word="${word}"]`);
+    elements.forEach(el => el.classList.add('hidden'));
+    unhighlightWord(word);
+    selectedWords.delete(word);
+    removeWordActions(word);
+}
+function strikeoutWord(word) {
+    const elements = document.querySelectorAll(`[data-word="${word}"]`);
+    elements.forEach(el => el.classList.add('strikeout'));
+}
+function goToNextOccurrence(word) {
+    const info = selectedWords.get(word);
+    if (info) {
+        info.currentIndex = (info.currentIndex + 1) % info.elements.length;
+        const nextElement = info.elements[info.currentIndex];
+        nextElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+}
+
+function updateCounters() {
+    selectedWords.forEach((info, word) => {
+        info.elements.forEach((el, index) => {
+            const counter = el.parentNode.querySelector('.counter');
+            if (counter) {
+                counter.innerHTML = `<span class="current">${index + 1}</span>/<span class="total">${info.elements.length}</span>`;
+                showCounter(el.parentNode);
+            }
+        });
+    });
+}
+
 function updateWordVisibility(threshold) {
     const sortedWords = Object.entries(wordCounts).sort((a, b) => a[1] - b[1]);
     const totalWords = sortedWords.length;
