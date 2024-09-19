@@ -10,6 +10,8 @@ The script supports two methods of input: file input and direct text input via c
 
 https://genaforvena.github.io/tikziod-thinking/
 
+https://genaforvena.github.io/tikziod-thinking/anti-oediupus.html to check the visualization of the book "Anti-Oedipus" by Deleuze and Guattari. It is large and may take a while to load.
+
 #### File Input
 
 1. Create a text file with your input texts, one per line. For example, `input.txt`:
