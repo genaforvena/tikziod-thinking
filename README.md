@@ -6,6 +6,10 @@ This script generates an interactive HTML visualization of intersecting texts, f
 
 The script supports two methods of input: file input and direct text input via command line.
 
+### Example output
+
+https://genaforvena.github.io/tikziod-thinking/
+
 #### File Input
 
 1. Create a text file with your input texts, one per line. For example, `input.txt`:
