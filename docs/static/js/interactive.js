@@ -68,12 +68,14 @@ function showWordControls(word) {
         <span>${word}: </span>
         <button class="remove-button">Remove</button>
         <button class="strikeout-button">Strikeout</button>
+        <button class="prev-button">Previous</button>
         <button class="next-button">Next</button>
     `;
     controlsContainer.appendChild(wordControls);
 
     wordControls.querySelector('.remove-button').addEventListener('click', () => removeWord(word));
     wordControls.querySelector('.strikeout-button').addEventListener('click', () => strikeoutWord(word));
+    wordControls.querySelector('.prev-button').addEventListener('click', () => goToPreviousOccurrence(word));
     wordControls.querySelector('.next-button').addEventListener('click', () => goToNextOccurrence(word));
 }
 
@@ -99,8 +101,23 @@ function goToNextOccurrence(word) {
     const info = selectedWords.get(word);
     if (info) {
         info.currentIndex = (info.currentIndex + 1) % info.elements.length;
-        const nextElement = info.elements[info.currentIndex];
-        nextElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        scrollToCurrentOccurrence(word);
+    }
+}
+
+function goToPreviousOccurrence(word) {
+    const info = selectedWords.get(word);
+    if (info) {
+        info.currentIndex = (info.currentIndex - 1 + info.elements.length) % info.elements.length;
+        scrollToCurrentOccurrence(word);
+    }
+}
+
+function scrollToCurrentOccurrence(word) {
+    const info = selectedWords.get(word);
+    if (info) {
+        const currentElement = info.elements[info.currentIndex];
+        currentElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 }
 
@@ -159,6 +176,71 @@ function closeHiddenWordsPopup() {
     popup.style.display = 'none';
 }
 
+let searchHighlight = null;
+
+function addSearchBar() {
+    const searchContainer = document.createElement('div');
+    searchContainer.id = 'search-container';
+    searchContainer.innerHTML = `
+        <input type="text" id="search-input" placeholder="Search for words...">
+        <span id="search-count"></span>
+    `;
+    document.body.insertBefore(searchContainer, document.body.firstChild);
+
+    const searchInput = document.getElementById('search-input');
+    searchInput.addEventListener('input', handleSearch);
+}
+
+function handleSearch() {
+    const searchTerm = this.value.toLowerCase();
+    const searchCount = document.getElementById('search-count');
+    
+    if (searchTerm.length === 0) {
+        if (searchHighlight) {
+            searchHighlight.classList.remove('search-highlight');
+            searchHighlight = null;
+        }
+        searchCount.textContent = '';
+        return;
+    }
+
+    const matches = [];
+    wordElements.forEach((elements, word) => {
+        if (word.toLowerCase().includes(searchTerm)) {
+            matches.push(...elements);
+        }
+    });
+
+    if (matches.length > 0) {
+        searchCount.textContent = `${matches.length} match${matches.length > 1 ? 'es' : ''}`;
+        highlightNextMatch(matches);
+    } else {
+        searchCount.textContent = 'No matches';
+        if (searchHighlight) {
+            searchHighlight.classList.remove('search-highlight');
+            searchHighlight = null;
+        }
+    }
+}
+
+function highlightNextMatch(matches) {
+    if (searchHighlight) {
+        searchHighlight.classList.remove('search-highlight');
+    }
+
+    let nextMatch;
+    if (!searchHighlight) {
+        nextMatch = matches[0];
+    } else {
+        const currentIndex = matches.indexOf(searchHighlight);
+        nextMatch = matches[(currentIndex + 1) % matches.length];
+    }
+
+    searchHighlight = nextMatch;
+    searchHighlight.classList.add('search-highlight');
+    searchHighlight.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const commonWords = document.querySelectorAll('.common-word');
     commonWords.forEach(word => {
@@ -201,4 +283,36 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     });
+
+    addSearchBar();
+
+    // Add this new CSS for search highlight
+    const style = document.createElement('style');
+    style.textContent = `
+        .search-highlight {
+            background-color: yellow;
+            font-weight: bold;
+        }
+        #search-container {
+            position: fixed;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            background-color: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        #search-input {
+            padding: 5px;
+            width: 200px;
+        }
+        #search-count {
+            margin-left: 10px;
+            font-size: 0.9em;
+            color: #666;
+        }
+    `;
+    document.head.appendChild(style);
 });
