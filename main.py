@@ -19,7 +19,7 @@ async def main():
     word_sets, word_counts, word_positions = process_texts(texts)
     html_code = generate_html(texts, word_counts, word_positions)
 
-    with open('intersecting_texts.html', 'w') as f:
+    with open('docs/index.html', 'w') as f:
         f.write(html_code)
     
     print("Interactive HTML file 'intersecting_texts.html' has been generated.")
