@@ -241,6 +241,72 @@ function highlightNextMatch(matches) {
     searchHighlight.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
+function encodeState() {
+    const state = {
+        slider: document.getElementById('frequency-slider').value,
+        removed: Array.from(selectedWords.entries())
+            .filter(([word, info]) => info.elements[0].classList.contains('hidden'))
+            .map(([word]) => word),
+        highlighted: Array.from(selectedWords.keys()),
+        cursors: Object.fromEntries(
+            Array.from(selectedWords.entries()).map(([word, info]) => [word, info.currentIndex])
+        )
+    };
+    return btoa(JSON.stringify(state));
+}
+
+function decodeState(encodedState) {
+    try {
+        return JSON.parse(atob(encodedState));
+    } catch (e) {
+        console.error("Failed to decode state:", e);
+        return null;
+    }
+}
+
+function applyState(state) {
+    if (!state) return;
+
+    // Set slider position
+    const slider = document.getElementById('frequency-slider');
+    slider.value = state.slider;
+    updateWordVisibility(state.slider);
+
+    // Remove words
+    state.removed.forEach(removeWord);
+
+    // Highlight words and set cursors
+    state.highlighted.forEach(word => {
+        toggleWordSelection(word);
+        if (state.cursors[word] !== undefined) {
+            const info = selectedWords.get(word);
+            if (info) {
+                info.currentIndex = state.cursors[word];
+                scrollToCurrentOccurrence(word);
+            }
+        }
+    });
+}
+
+function generateShareableLink() {
+    const baseUrl = window.location.href.split('?')[0];
+    const state = encodeState();
+    return `${baseUrl}?state=${state}`;
+}
+
+function addShareButton() {
+    const shareButton = document.createElement('button');
+    shareButton.id = 'share-button';
+    shareButton.textContent = 'Share Current State';
+    shareButton.addEventListener('click', () => {
+        const link = generateShareableLink();
+        navigator.clipboard.writeText(link).then(() => {
+            alert('Shareable link copied to clipboard!');
+        });
+    });
+    document.body.appendChild(shareButton);
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const commonWords = document.querySelectorAll('.common-word');
     commonWords.forEach(word => {
@@ -285,34 +351,62 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     addSearchBar();
+    addShareButton();
 
-    // Add this new CSS for search highlight
+    // Check if there's a state in the URL and apply it
+    const urlParams = new URLSearchParams(window.location.search);
+    const encodedState = urlParams.get('state');
+    if (encodedState) {
+        const state = decodeState(encodedState);
+        applyState(state);
+    }
+
+    // Add this new CSS for the share button
     const style = document.createElement('style');
-    style.textContent = `
-        .search-highlight {
-            background-color: yellow;
-            font-weight: bold;
-        }
+    style.textContent += `
         #search-container {
             position: fixed;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 1000;
-            background-color: white;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: #f8f9fa;
             padding: 10px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 1001;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
         #search-input {
-            padding: 5px;
-            width: 200px;
+            padding: 5px 10px;
+            width: 300px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 16px;
         }
         #search-count {
             margin-left: 10px;
-            font-size: 0.9em;
-            color: #666;
+            font-size: 14px;
+            color: #6c757d;
+        }
+        #share-button {
+            position: fixed;
+            top: 33vh;  /* Position it 1/3 down the viewport height */
+            right: 20px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 1000;
+            transform: rotate(-90deg);  /* Rotate the button for vertical text */
+            transform-origin: right center;  /* Set rotation origin */
+        }
+        #share-button:hover {
+            background-color: #0056b3;
         }
     `;
     document.head.appendChild(style);
+
 });
