@@ -3,6 +3,8 @@ let colorIndex = 0;
 const colors = ['highlight-0', 'highlight-1', 'highlight-2', 'highlight-3', 'highlight-4'];
 let sortedWords = [];
 let wordElements = new Map();
+let removedWords = new Set();
+let struckOutWords = new Set();
 
 function toggleWordSelection(word, element) {
     if (selectedWords.has(word)) {
@@ -89,11 +91,15 @@ function removeWord(word) {
     elements.forEach(el => el.classList.add('hidden'));
     unhighlightWord(word);
     selectedWords.delete(word);
+    
     removeWordControls(word);
+
+    removedWords.add(word);
 }
 
 function strikeoutWord(word) {
     const elements = wordElements.get(word) || [];
+    struckOutWords = struckOutWords.add(word);
     elements.forEach(el => el.classList.add('strikeout'));
 }
 
@@ -244,47 +250,43 @@ function highlightNextMatch(matches) {
 function encodeState() {
     const state = {
         slider: document.getElementById('frequency-slider').value,
-        removed: Array.from(selectedWords.entries())
-            .filter(([word, info]) => info.elements[0].classList.contains('hidden'))
-            .map(([word]) => word),
         highlighted: Array.from(selectedWords.keys()),
         cursors: Object.fromEntries(
             Array.from(selectedWords.entries()).map(([word, info]) => [word, info.currentIndex])
-        )
+        ),
+        removed: Array.from(removedWords),
+        struckOut: Array.from(struckOutWords),
     };
+
+  console.log(state);
     return btoa(JSON.stringify(state));
 }
 
 function decodeState(encodedState) {
-    try {
-        return JSON.parse(atob(encodedState));
-    } catch (e) {
-        console.error("Failed to decode state:", e);
-        return null;
-    }
+    return JSON.parse(atob(encodedState));
 }
 
 function applyState(state) {
-    if (!state) return;
-
-    // Set slider position
+    removedWords = new Set(state.removed);
+    struckOutWords = new Set(state.struckOut);
     const slider = document.getElementById('frequency-slider');
     slider.value = state.slider;
     updateWordVisibility(state.slider);
+   
+    console.log(state);
+    state.removed.forEach(word => {
+        removeWord(word);
+  });
 
-    // Remove words
-    state.removed.forEach(removeWord);
-
-    // Highlight words and set cursors
     state.highlighted.forEach(word => {
-        toggleWordSelection(word);
-        if (state.cursors[word] !== undefined) {
-            const info = selectedWords.get(word);
-            if (info) {
-                info.currentIndex = state.cursors[word];
-                scrollToCurrentOccurrence(word);
-            }
-        }
+        const elements = wordElements.get(word) || [];
+        elements.forEach(el => el.classList.add('highlight-0'));
+        selectedWords.set(word, {
+            color: 'highlight-0',
+            elements: elements,
+            currentIndex: state.cursors[word]
+        });
+        showWordControls(word);
     });
 }
 
@@ -354,10 +356,13 @@ document.addEventListener('DOMContentLoaded', function() {
     addShareButton();
 
     // Check if there's a state in the URL and apply it
-    const urlParams = new URLSearchParams(window.location.search);
-    const encodedState = urlParams.get('state');
+  console.log(window.location.href);
+    encodedState = window.location.href.split('=')[1];
+    console.log("got from url:" + encodedState);
     if (encodedState) {
+
         const state = decodeState(encodedState);
+        console.log("decoded state:" + state);
         applyState(state);
     }
 
