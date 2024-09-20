@@ -278,6 +278,10 @@ function applyState(state) {
         removeWord(word);
   });
 
+    state.struckOut.forEach(word => {
+        strikeoutWord(word);
+  });
+
     state.highlighted.forEach(word => {
         const elements = wordElements.get(word) || [];
         elements.forEach(el => el.classList.add('highlight-0'));
@@ -286,7 +290,10 @@ function applyState(state) {
             elements: elements,
             currentIndex: state.cursors[word]
         });
+        scrollToCurrentOccurrence(word);
         showWordControls(word);
+
+    
     });
 }
 
