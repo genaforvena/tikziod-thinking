@@ -11,7 +11,7 @@ The script supports two methods of input: file input and direct text input via c
 https://genaforvena.github.io/tikziod-thinking/
 
 
-* [Tolstoy's Gospel](https://genaforvena.github.io/tikziod-thinking/gospel.html#word-son-36-11?state=eyJzbGlkZXIiOiIwIiwiaGlnaGxpZ2h0ZWQiOlsib3VyIl0sImN1cnNvcnMiOnsib3VyIjowfSwicmVtb3ZlZCI6WyJzb24iLCJnb2QiLCJtYW4iLCJtZW4iLCJmYXRoZXIiXSwic3RydWNrT3V0IjpbXX0=) - A visualization of the Gospel by Tolstoy in correct form, visualized.
+* [Tolstoy's Gospel](https://genaforvena.github.io/tikziod-thinking/gospel.html#word-son-36-11?state=eyJzbGlkZXIiOiIwIiwiaGlnaGxpZ2h0ZWQiOlsib3VyIl0sImN1cnNvcnMiOnsib3VyIjoxfSwicmVtb3ZlZCI6WyJzb24iLCJnb2QiLCJtYW4iLCJtZW4iLCJmYXRoZXIiXSwic3RydWNrT3V0IjpbXX0=]  - A visualization of the Gospel by Tolstoy in correct form .
 * [Worstward Hoe by Beckett](https://genaforvena.github.io/tikziod-thinking/worstward-hoe.html) - A visualization of the book "Worstward Hoe" by Samuel Beckett.
 * [Anti-Oedipus](https://genaforvena.github.io/tikziod-thinking/anti-oedipus.html) to check the visualization of the book "Anti-Oedipus" by Deleuze and Guattari. It is large and may take a while to load.
 
