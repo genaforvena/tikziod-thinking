@@ -88,7 +88,16 @@ function removeWordControls(word) {
 
 function removeWord(word) {
     const elements = wordElements.get(word) || [];
-    elements.forEach(el => el.classList.add('hidden'));
+    elements.forEach(el => { 
+        // Add empty text element with a size of the original text
+        let textNode = document.createTextNode('_'.repeat(el.textContent.length));
+        el.parentNode.insertBefore(textNode, el);
+
+        el.classList.add('removed-word');  // Add this new class
+        // Replace the word with spaces, maintaining the original length
+        el.dataset.originalText = el.textContent;
+        el.textContent = ' '.repeat(el.textContent.length);
+    });
     unhighlightWord(word);
     selectedWords.delete(word);
     
@@ -417,6 +426,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         #share-button:hover {
             background-color: #0056b3;
+        }
+        .removed-word {
+            text-decoration: underline;
+            text-decoration-style: solid;
+            text-decoration-color: #007bff;
+            text-decoration-thickness: 2px;
         }
     `;
     document.head.appendChild(style);
