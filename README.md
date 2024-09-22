@@ -11,6 +11,7 @@ The script supports two methods of input: file input and direct text input via c
 https://genaforvena.github.io/tikziod-thinking/
 
 
+* [Scum Manifesto](https://genaforvena.github.io/tikziod-thinking/scum_manifesto.html) - The only thing worth reading. The rest are paste.
 * [Tolstoy's Gospel](https://genaforvena.github.io/tikziod-thinking/gospel.html#word-son-36-11?state=eyJzbGlkZXIiOiIwIiwiaGlnaGxpZ2h0ZWQiOlsibGV0IiwiYXMiLCJvdXIiXSwiY3Vyc29ycyI6eyJsZXQiOjAsImFzIjowLCJvdXIiOjF9LCJyZW1vdmVkIjpbInNvbiIsImdvZCIsIm1hbiIsIm1lbiIsImZhdGhlciIsImhpcyIsImhpbXNlbGYiLCJldmlsIiwiZm9yZ2l2ZSIsImRlYnRzIiwiZXJyb3JzIiwibWlzdGFrZXMiLCJub3QiLCJubyIsImRlYnRvcnMiXSwic3RydWNrT3V0IjpbXX0=) - A visualization of the Gospel by Tolstoy in correct form .
 * [LP Tractatus](https://genaforvena.github.io/tikziod-thinking/logico.html) - Young Wittgenstein's Tractatus Logico-Philosophicus.
 * [Worstward Hoe by Beckett](https://genaforvena.github.io/tikziod-thinking/worstward_hoe.html) - A visualization of the book "Worstward Hoe" by Samuel Beckett.
