@@ -14,6 +14,7 @@ https://genaforvena.github.io/tikziod-thinking/
 * [Tolstoy's Gospel](https://genaforvena.github.io/tikziod-thinking/gospel.html#word-son-36-11?state=eyJzbGlkZXIiOiIwIiwiaGlnaGxpZ2h0ZWQiOlsibGV0IiwiYXMiLCJvdXIiXSwiY3Vyc29ycyI6eyJsZXQiOjAsImFzIjowLCJvdXIiOjF9LCJyZW1vdmVkIjpbInNvbiIsImdvZCIsIm1hbiIsIm1lbiIsImZhdGhlciIsImhpcyIsImhpbXNlbGYiLCJldmlsIiwiZm9yZ2l2ZSIsImRlYnRzIiwiZXJyb3JzIiwibWlzdGFrZXMiLCJub3QiLCJubyIsImRlYnRvcnMiXSwic3RydWNrT3V0IjpbXX0=) - A visualization of the Gospel by Tolstoy in correct form .
 * [LP Tractatus](https://genaforvena.github.io/tikziod-thinking/logico.html) - Young Wittgenstein's Tractatus Logico-Philosophicus.
 * [Worstward Hoe by Beckett](https://genaforvena.github.io/tikziod-thinking/worstward_hoe.html) - A visualization of the book "Worstward Hoe" by Samuel Beckett.
+* [Илья Масодов - Мрак твоих глаз](https://genaforvena.github.io/tikziod-thinking/mrak_rus.html) - Илья Масодов "Мрак твоих глаз" (a masterpiece in russian, yet to be translated into English).
 * [Anti-Oedipus](https://genaforvena.github.io/tikziod-thinking/anti-oedipus.html) to check the visualization of the book "Anti-Oedipus" by Deleuze and Guattari. It is large and may take a while to load.
 
 #### File Input
