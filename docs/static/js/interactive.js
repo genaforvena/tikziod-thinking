@@ -17,12 +17,13 @@ function initializeWordInteractions() {
 
         wordElement.addEventListener('click', function(e) {
             e.preventDefault();
-            toggleWordSelection(word, this);
+            const clickedIndex = wordElements.get(word).indexOf(this);
+            toggleWordSelection(word, clickedIndex);
         });
     });
 }
 
-function toggleWordSelection(word, element) {
+function toggleWordSelection(word, clickedIndex) {
     if (selectedWords.has(word)) {
         unhighlightWord(word);
         selectedWords.delete(word);
@@ -32,12 +33,13 @@ function toggleWordSelection(word, element) {
         selectedWords.set(word, {
             color: colors[colorIndex],
             elements: wordElements.get(word) || [],
-            currentIndex: 0
+            currentIndex: clickedIndex
         });
         colorIndex = (colorIndex + 1) % colors.length;
-        showWordControls(word, element);
+        showWordControls(word);
     }
     updateCounters();
+    updateControlsPanel();
 }
 
 function highlightWord(word) {
@@ -56,29 +58,43 @@ function unhighlightWord(word) {
     }
 }
 
-function showWordControls(word, element) {
-    const controlsContainer = document.getElementById('word-controls');
-    const wordControls = document.createElement('div');
-    wordControls.id = `controls-${word}`;
-    const occurrences = wordElements.get(word)?.length || 0;
-    wordControls.innerHTML = `
-        <span>${word} (${occurrences}): </span>
-        <button class="remove-button">Remove</button>
-        <button class="strikeout-button">Strikeout</button>
-        ${occurrences > 1 ? `
-            <button class="prev-button">Previous</button>
-            <button class="next-button">Next</button>
-            <span class="occurrence-counter">1/${occurrences}</span>
-        ` : ''}
-    `;
-    controlsContainer.appendChild(wordControls);
+function showWordControls(word) {
+    updateControlsPanel();
+}
 
-    wordControls.querySelector('.remove-button').addEventListener('click', () => removeWord(word));
-    wordControls.querySelector('.strikeout-button').addEventListener('click', () => strikeoutWord(word));
-    if (occurrences > 1) {
-        wordControls.querySelector('.prev-button').addEventListener('click', () => goToPreviousOccurrence(word));
-        wordControls.querySelector('.next-button').addEventListener('click', () => goToNextOccurrence(word));
-    }
+function updateControlsPanel() {
+    const controlsContainer = document.getElementById('word-controls');
+    controlsContainer.innerHTML = '';
+    selectedWords.forEach((info, word) => {
+        const wordControl = document.createElement('div');
+        wordControl.className = 'word-control';
+        wordControl.innerHTML = `
+            <span>${word} (${info.elements.length}): </span>
+            <button class="remove-button">Remove</button>
+            <button class="strikeout-button">Strikeout</button>
+            <button class="goto-button">Go to</button>
+            ${info.elements.length > 1 ? `
+                <button class="prev-button">Previous</button>
+                <button class="next-button">Next</button>
+            ` : ''}
+            <span class="occurrence-counter">${info.currentIndex + 1}/${info.elements.length}</span>
+            <button class="close-button">×</button>
+        `;
+        controlsContainer.appendChild(wordControl);
+
+        wordControl.querySelector('.remove-button').addEventListener('click', () => removeWord(word));
+        wordControl.querySelector('.strikeout-button').addEventListener('click', () => strikeoutWord(word));
+        wordControl.querySelector('.goto-button').addEventListener('click', () => goToCurrentOccurrence(word));
+        if (info.elements.length > 1) {
+            wordControl.querySelector('.prev-button').addEventListener('click', () => goToPreviousOccurrence(word));
+            wordControl.querySelector('.next-button').addEventListener('click', () => goToNextOccurrence(word));
+        }
+        wordControl.querySelector('.close-button').addEventListener('click', () => {
+            unhighlightWord(word);
+            selectedWords.delete(word);
+            updateControlsPanel();
+        });
+    });
 }
 
 function removeWord(word) {
@@ -92,8 +108,8 @@ function removeWord(word) {
     });
     unhighlightWord(word);
     selectedWords.delete(word);
-    removeWordControls(word);
     removedWords.add(word);
+    updateControlsPanel();
 }
 
 function strikeoutWord(word) {
@@ -102,25 +118,7 @@ function strikeoutWord(word) {
     elements.forEach(el => el.classList.add('strikeout'));
 }
 
-function goToNextOccurrence(word) {
-    const info = selectedWords.get(word);
-    if (info && info.elements.length > 1) {
-        info.currentIndex = (info.currentIndex + 1) % info.elements.length;
-        scrollToCurrentOccurrence(word);
-        updateOccurrenceCounter(word);
-    }
-}
-
-function goToPreviousOccurrence(word) {
-    const info = selectedWords.get(word);
-    if (info && info.elements.length > 1) {
-        info.currentIndex = (info.currentIndex - 1 + info.elements.length) % info.elements.length;
-        scrollToCurrentOccurrence(word);
-        updateOccurrenceCounter(word);
-    }
-}
-
-function scrollToCurrentOccurrence(word) {
+function goToCurrentOccurrence(word) {
     const info = selectedWords.get(word);
     if (info && info.elements.length > 0) {
         const element = info.elements[info.currentIndex];
@@ -128,22 +126,22 @@ function scrollToCurrentOccurrence(word) {
     }
 }
 
-function updateOccurrenceCounter(word) {
+function goToNextOccurrence(word) {
     const info = selectedWords.get(word);
     if (info && info.elements.length > 1) {
-        const controls = document.getElementById(`controls-${word}`);
-        if (controls) {
-            const counter = controls.querySelector('.occurrence-counter');
-            if (counter) {
-                counter.textContent = `${info.currentIndex + 1}/${info.elements.length}`;
-            }
-        }
+        info.currentIndex = (info.currentIndex + 1) % info.elements.length;
+        goToCurrentOccurrence(word);
+        updateControlsPanel();
     }
 }
 
-function removeWordControls(word) {
-    const controls = document.getElementById(`controls-${word}`);
-    if (controls) controls.remove();
+function goToPreviousOccurrence(word) {
+    const info = selectedWords.get(word);
+    if (info && info.elements.length > 1) {
+        info.currentIndex = (info.currentIndex - 1 + info.elements.length) % info.elements.length;
+        goToCurrentOccurrence(word);
+        updateControlsPanel();
+    }
 }
 
 function updateCounters() {
@@ -355,17 +353,36 @@ document.addEventListener('DOMContentLoaded', function() {
         #share-button:hover {
             background-color: #0056b3;
         }
-        .removed-word {
-            text-decoration: underline;
-            text-decoration-style: solid;
-            text-decoration-color: #007bff;
-            text-decoration-thickness: 2px;
+        #word-controls {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background-color: white;
+            border: 1px solid #ccc;
+            padding: 10px;
+            max-height: 80vh;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+        .word-control {
+            margin-bottom: 10px;
+        }
+        .close-button {
+            cursor: pointer;
+            float: right;
+            font-weight: bold;
         }
         .word, .common-word {
             cursor: pointer;
         }
         .word:hover, .common-word:hover {
             background-color: #f0f0f0;
+        }
+        .removed-word {
+            text-decoration: underline;
+            text-decoration-style: solid;
+            text-decoration-color: #007bff;
+            text-decoration-thickness: 2px;
         }
     `;
     document.head.appendChild(style);
