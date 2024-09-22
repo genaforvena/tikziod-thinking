@@ -15,6 +15,7 @@ https://genaforvena.github.io/tikziod-thinking/
 * [LP Tractatus](https://genaforvena.github.io/tikziod-thinking/logico.html) - Young Wittgenstein's Tractatus Logico-Philosophicus.
 * [Worstward Hoe by Beckett](https://genaforvena.github.io/tikziod-thinking/worstward_hoe.html) - A visualization of the book "Worstward Hoe" by Samuel Beckett.
 * [Илья Масодов - Мрак твоих глаз](https://genaforvena.github.io/tikziod-thinking/mrak_rus.html) - Илья Масодов "Мрак твоих глаз" (a masterpiece in russian, yet to be translated into English).
+* [Ilya Masodov - The darkness of your eyes](https://genaforvena.github.io/tikziod-thinking/mrak_eng_machine.html) - The masterpiece from above in English, roughly translated with small llms (low quality, yet to be edited).
 * [Anti-Oedipus](https://genaforvena.github.io/tikziod-thinking/anti-oedipus.html) to check the visualization of the book "Anti-Oedipus" by Deleuze and Guattari. It is large and may take a while to load.
 
 #### File Input
