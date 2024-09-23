@@ -25,10 +25,12 @@ function initializeWordInteractions() {
 
 function toggleWordSelection(word, clickedIndex) {
     if (selectedWords.has(word)) {
+        // Word is already selected, so we're deselecting it
         unhighlightWord(word);
         selectedWords.delete(word);
         removeWordControls(word);
     } else {
+        // Word is not selected, so we're selecting it
         highlightWord(word);
         selectedWords.set(word, {
             color: colors[colorIndex],
@@ -36,7 +38,6 @@ function toggleWordSelection(word, clickedIndex) {
             currentIndex: clickedIndex
         });
         colorIndex = (colorIndex + 1) % colors.length;
-        showWordControls(word);
     }
     updateCounters();
     updateControlsPanel();
@@ -110,6 +111,11 @@ function removeWord(word) {
     selectedWords.delete(word);
     removedWords.add(word);
     updateControlsPanel();
+}
+
+function removeWordControls(word) {
+    // This function is now handled by updateControlsPanel
+    // We keep it for compatibility with other parts of the code
 }
 
 function strikeoutWord(word) {
