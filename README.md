@@ -1,10 +1,10 @@
-## Interactive HTML Intersecting Texts Visualizer with Word Counters and Hover Effects
+# Interactive HTML Intersecting Texts Visualizer with Word Counters and Hover Effects
 
-This script generates an interactive HTML visualization of intersecting texts, featuring word counters, hover effects, and dynamic highlighting.
+This script generates an interactive HTML visualization of intersecting texts, featuring word counters, hover effects, and dynamic highlighting. It now supports both text and PDF files as input.
 
-### Basic Usage
+## Basic Usage
 
-The script supports two methods of input: file input and direct text input via command line.
+The script supports three methods of input: text file input, PDF file input, and direct text input via command line.
 
 ### Example output
 
@@ -20,20 +20,22 @@ https://genaforvena.github.io/tikziod-thinking/
 * [Ilya Masodov - The darkness of your eyes](https://genaforvena.github.io/tikziod-thinking/mrak_eng_machine.html) - The masterpiece from above in English, roughly translated with small llms (low quality, yet to be edited).
 * [Anti-Oedipus](https://genaforvena.github.io/tikziod-thinking/anti-oedipus.html) to check the visualization of the book "Anti-Oedipus" by Deleuze and Guattari. It is large and may take a while to load.
 
-#### File Input
+### File Input (Text or PDF)
 
-1. Create a text file with your input texts, one per line. For example, `input.txt`:
-
-   ```
-   The quick brown fox jumps over the lazy dog
-   A quick brown dog jumps over the lazy cat
-   The lazy fox and the quick cat are friends
-   ```
+1. Prepare your input file. This can be either:
+   - A text file with your input texts, one per line.
+   - A PDF file containing the text you want to visualize.
 
 2. Run the script with the file input option:
 
    ```
    python main.py -f input.txt
+   ```
+
+   or for a PDF file:
+
+   ```
+   python main.py -f document.pdf
    ```
 
 #### Direct Text Input
