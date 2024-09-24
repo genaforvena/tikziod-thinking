@@ -1,9 +1,23 @@
 import re
 from collections import defaultdict
+import PyPDF2
 
 def read_file(file_path):
-    with open(file_path, 'r') as file:
-        return [line.strip() for line in file if line.strip()]
+    if file_path.lower().endswith('.pdf'):
+        return read_pdf(file_path)
+    else:
+        with open(file_path, 'r') as file:
+            return [line.strip() for line in file if line.strip()]
+
+def read_pdf(file_path):
+    texts = []
+    with open(file_path, 'rb') as file:
+        pdf_reader = PyPDF2.PdfReader(file)
+        for page in pdf_reader.pages:
+            text = page.extract_text()
+            if text.strip():
+                texts.append(text.strip())
+    return texts
 
 def process_texts(texts):
     word_sets = [set(re.findall(r'\b\w+\b', text.lower())) for text in texts]

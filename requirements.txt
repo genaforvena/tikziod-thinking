@@ -5,6 +5,7 @@ matplotlib==3.4.2
 # Text processing
 nltk==3.6.2
 ollama==0.1.0
+PyPDF2==3.0.1
 
 # LaTeX generation
 jinja2==3.0.1
