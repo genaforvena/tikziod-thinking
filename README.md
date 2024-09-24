@@ -1,6 +1,6 @@
 # Interactive HTML Intersecting Texts Visualizer with Word Counters and Hover Effects
 
-This script generates an interactive HTML visualization of intersecting texts, featuring word counters, hover effects, and dynamic highlighting. It now supports both text and PDF files as input.
+This script generates an interactive HTML visualization of intersecting texts, featuring word counters, hover effects, and dynamic highlighting. It supports both text and PDF files as input.
 
 ## Basic Usage
 
@@ -46,31 +46,57 @@ You can provide texts directly as command-line arguments. Make sure to enclose e
 python main.py -t "First text here" "Second text here" "Third text here"
 ```
 
-### Viewing the Visualization
+## Viewing and Interacting with the Visualization
 
 After running the script:
 
-1. An interactive HTML file named `intersecting_texts.html` will be generated in the same directory.
+1. An interactive HTML file named `index.html` will be generated in the `docs` folder.
 
 2. Open this file in any modern web browser to view the visualization.
 
-3. Ensure you have an internet connection when viewing the HTML file, as it uses Google Fonts.
+3. The visualization offers a rich set of interactive features:
 
-### Understanding the Output
+   - **Word Selection**: Click on any word to highlight all its occurrences across the text(s). Each selected word gets a unique color.
+   
+   - **Word Controls**: For each selected word, a control panel appears with options to:
+     - Remove the word (replacing it with underscores)
+     - Strike out the word
+     - Navigate between occurrences ("Go to", "Previous", "Next")
+     - View the current occurrence number out of total occurrences
+   
+   - **Frequency Slider**: Use the slider to hide less frequent words, dynamically updating the visualization.
+   
+   - **Hidden Words Popup**: View a list of words hidden by the frequency slider.
+   
+   - **Search Functionality**: Use the search bar to find specific words or phrases in the text.
+   
+   - **Shareable State**: Generate a shareable link that captures the current state of your visualization, including highlighted, removed, and struck-out words.
 
-- Each input text is displayed as a separate paragraph, prefixed with "Text 1:", "Text 2:", etc.
-- Words that appear in more than one text are highlighted in bold and assigned a unique typeface.
-- The font size of each word is proportional to its frequency across all texts.
-- Common words (those appearing in multiple texts) are clickable and have hover effects.
+4. Additional Interactive Elements:
+   - Hover over words to see their frequency across all texts.
+   - The font size of words reflects their frequency or importance in the text.
+   - Some words may be pre-highlighted or styled differently based on their significance in the text.
 
-### Interactive Features
+5. This visualization technique allows you to engage with the text in new ways, emphasizing certain words or themes and providing a unique perspective on the content.
 
-- When you hover over a common word:
-  - A counter appears above the word, showing its current occurrence and total occurrences.
-  - All instances of that word across all texts are highlighted.
-- Common words are clickable. When you click on a common word, the page will smoothly scroll to the next occurrence of that word in another text.
-- The target word is briefly highlighted when scrolled to, making it easy to locate.
-- You can continue clicking to cycle through all occurrences of the word across different texts.
+6. Ensure you have an internet connection when viewing the HTML file, as it uses external resources like Google Fonts.
+
+## Advanced Features
+
+- **State Preservation**: The tool can encode the current state of the visualization (highlighted words, removed words, slider position, etc.) into a URL parameter. This allows you to share or bookmark specific views of the text.
+
+- **Responsive Design**: The interface includes fixed position elements like the search bar and word controls panel for easy access while scrolling through long texts.
+
+- **Performance Optimization**: The tool is designed to handle large texts efficiently, with features like dynamic word hiding to manage visual complexity.
+
+## Customization
+
+You can customize the visualization by modifying the `interactive.js` file:
+
+- Adjust the color scheme for highlighted words
+- Modify the behavior of word selection and navigation
+- Add new interactive features or buttons
+- Customize the styling of various elements (words, control panels, popups)
 
 ### Tips for Optimal Results
 
