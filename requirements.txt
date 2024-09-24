@@ -4,8 +4,13 @@ matplotlib==3.4.2
 
 # Text processing
 nltk==3.6.2
-ollama==0.1.0
 PyPDF2==3.0.1
+python-docx==0.8.11
+markdown==3.3.4
+beautifulsoup4==4.9.3
+
+# URL handling
+requests==2.25.1
 
 # LaTeX generation
 jinja2==3.0.1
