@@ -106,12 +106,6 @@ You can customize the visualization by modifying the `interactive.js` file:
 
 3. **Word Frequency**: The visualization is most effective when there's a good mix of common and unique words. This creates an interesting visual hierarchy while maintaining readability.
 
-### Customization
-
-- If you want to use different fonts, you can modify the `fonts` list in the script. Make sure to also update the Google Fonts link in the HTML template if you add new fonts.
-- You can adjust the `calculate_font_size` function in the script to change how word frequency affects font size.
-- The appearance of the counters and highlighting can be modified by adjusting the CSS in the HTML template.
-
 ### Troubleshooting
 
 If you encounter any issues:
@@ -122,12 +116,3 @@ If you encounter any issues:
 4. If the interactive features are not working, check your browser's JavaScript settings.
 
 Note: If you need to convert the HTML to PDF, the interactive features and custom fonts may not be preserved in the PDF version.
-
-### Recent Updates
-
-- Added hover effects to show word counters only when hovering over words.
-- Implemented dynamic highlighting of all instances of a word when hovering.
-- Fixed JSON serialization issues for improved compatibility with various input texts.
-- Improved smooth scrolling behavior with fallback for older browsers.
-
-For any further questions or issues, please refer to the script comments or reach out to the project maintainers.
