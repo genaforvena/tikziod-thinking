@@ -16,6 +16,7 @@ https://genaforvena.github.io/tikziod-thinking/
 * [Илья Масодов - Мрак твоих глаз](https://genaforvena.github.io/tikziod-thinking/mrak_rus.html) - Илья Масодов "Мрак твоих глаз" (a masterpiece in russian, yet to be translated into English).
 * [Ilya Masodov - The darkness of your eyes](https://genaforvena.github.io/tikziod-thinking/mrak_eng_machine.html) - The masterpiece from above in English, roughly translated with small llms (low quality, yet to be edited).
 * [Anti-Oedipus](https://genaforvena.github.io/tikziod-thinking/anti-oedipus.html) to check the visualization of the book "Anti-Oedipus" by Deleuze and Guattari. It is large and may take a while to load.
+* [Finnegans Wake](https://genaforvena.github.io/tikziod-thinking/finnegans_wake.html) - A visualization of the book "Finnegans Wake" by James Joyce.
 
 ## Supported File Formats
 
